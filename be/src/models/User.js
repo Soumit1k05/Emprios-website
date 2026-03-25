@@ -25,6 +25,29 @@ const userSchema = new mongoose.Schema(
       enum: ['admin', 'affiliate'],
       default: 'affiliate',
     },
+    phone: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    company: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    bio: {
+      type: String,
+      maxlength: 300,
+      default: '',
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    lastLogin: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );

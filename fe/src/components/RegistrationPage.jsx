@@ -1,19 +1,39 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight, Loader2 } from 'lucide-react';
-import logo from '../assets/Empiros_Logo.jpeg';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, Lock, User, Phone, Building2, ArrowRight, Loader2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
-export default function RegistrationPage() {
+const InputField = ({ icon: Icon, label, name, type = 'text', placeholder, value, onChange, required = false, minLength }) => (
+  <div className="space-y-1.5">
+    <label className="text-[9px] font-black uppercase tracking-widest opacity-50">{label}</label>
+    <div className="relative">
+      <Icon className="absolute left-4 top-1/2 -translate-y-1/2 opacity-40" size={15} />
+      <input
+        type={type}
+        name={name}
+        placeholder={placeholder}
+        required={required}
+        minLength={minLength}
+        value={value}
+        onChange={onChange}
+        className="w-full bg-white/10 border border-white/20 rounded-2xl py-3.5 pl-11 pr-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all placeholder:opacity-30"
+      />
+    </div>
+  </div>
+);
+
+export default function AuthPage({ onSuccess }) {
+  const { login } = useAuth();
+  const [tab, setTab] = useState('register');
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
+    name: '', email: '', password: '', phone: '', company: '',
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setMessage({ type: '', text: '' });
   };
 
   const handleSubmit = async (e) => {
@@ -21,131 +41,134 @@ export default function RegistrationPage() {
     setLoading(true);
     setMessage({ type: '', text: '' });
 
+    const endpoint = tab === 'register'
+      ? 'http://localhost:5000/api/auth/register'
+      : 'http://localhost:5000/api/auth/login';
+
+    const body = tab === 'register'
+      ? { name: formData.name, email: formData.email, password: formData.password, phone: formData.phone, company: formData.company }
+      : { email: formData.email, password: formData.password };
+
     try {
-      const response = await fetch('http://localhost:5000/api/register', {
+      const res = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       });
+      const data = await res.json();
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage({ type: 'success', text: 'Registration successful! Welcome to Empiros.' });
-        setFormData({ name: '', email: '', password: '' });
+      if (res.ok) {
+        login(data);
+        onSuccess();
       } else {
-        setMessage({ type: 'error', text: data.message || 'Registration failed. Please try again.' });
+        setMessage({ type: 'error', text: data.message || 'Something went wrong.' });
       }
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Server error. Please check if the backend is running.' });
+    } catch {
+      setMessage({ type: 'error', text: 'Cannot reach server. Make sure backend is running.' });
     } finally {
       setLoading(false);
     }
   };
 
+  const switchTab = (newTab) => {
+    setTab(newTab);
+    setFormData({ name: '', email: '', password: '', phone: '', company: '' });
+    setMessage({ type: '', text: '' });
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md bg-white rounded-3xl shadow-2xl shadow-slate-200/50 p-10 border border-slate-100"
-      >
-        <div className="flex flex-col items-center mb-8">
-          <motion.img 
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            src={logo} 
-            alt="Empiros Logo" 
-            className="h-16 w-auto mb-4 rounded-xl"
-          />
-          <h2 className="text-3xl font-bold text-slate-800 tracking-tight">Create Account</h2>
-          <p className="text-slate-500 mt-2 font-medium">Join the Empiros ecosystem today.</p>
+    <motion.div
+      key="auth"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="max-w-md mx-auto"
+    >
+      <div className="glass-pod p-10">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-black text-2xl italic mx-auto mb-4 shadow-lg shadow-blue-500/30">
+            E
+          </div>
+          <h2 className="text-2xl font-black uppercase tracking-tighter">
+            {tab === 'register' ? 'Create Account' : 'Welcome Back'}
+          </h2>
+          <p className="text-[10px] font-bold opacity-40 mt-1.5 uppercase tracking-widest">
+            {tab === 'register' ? 'Join the Empiros ecosystem today' : 'Sign in to your Empiros account'}
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700 ml-1">Full Name</label>
-            <div className="relative">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-              <input
-                type="text"
-                name="name"
-                placeholder="John Doe"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700 ml-1">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-              <input
-                type="email"
-                name="email"
-                placeholder="name@company.com"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700 ml-1">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-              <input
-                type="password"
-                name="password"
-                placeholder="••••••••"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-              />
-            </div>
-          </div>
-
-          {message.text && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              className={`p-4 rounded-xl text-sm font-medium ${
-                message.type === 'success' ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-red-50 text-red-600 border border-red-100'
+        {/* Tabs */}
+        <div className="flex bg-white/10 rounded-2xl p-1 mb-8">
+          {['register', 'login'].map((t) => (
+            <button
+              key={t}
+              onClick={() => switchTab(t)}
+              className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                tab === t ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'opacity-40 hover:opacity-70'
               }`}
             >
-              {message.text}
-            </motion.div>
-          )}
+              {t === 'register' ? 'Sign Up' : 'Sign In'}
+            </button>
+          ))}
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <AnimatePresence>
+            {tab === 'register' && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="space-y-4 overflow-hidden"
+              >
+                <InputField icon={User}      label="Full Name"    name="name"    placeholder="John Doe"         value={formData.name}    onChange={handleChange} required />
+                <InputField icon={Phone}     label="Phone Number" name="phone"   placeholder="+1 234 567 8900"  value={formData.phone}   onChange={handleChange} />
+                <InputField icon={Building2} label="Company"      name="company" placeholder="Acme Corp (optional)" value={formData.company} onChange={handleChange} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <InputField icon={Mail} label="Email Address" name="email" type="email" placeholder="name@company.com" value={formData.email} onChange={handleChange} required />
+          <InputField icon={Lock} label="Password"      name="password" type="password" placeholder="Min. 6 characters" value={formData.password} onChange={handleChange} required minLength={6} />
+
+          {/* Message */}
+          <AnimatePresence>
+            {message.text && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="p-4 rounded-2xl text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/20"
+              >
+                {message.text}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary text-white font-bold py-4 rounded-2xl shadow-lg shadow-primary/30 hover:bg-blue-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group disabled:opacity-70"
+            className="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-blue-500/30 hover:bg-blue-500 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group disabled:opacity-60 text-[10px] uppercase tracking-widest mt-2"
           >
-            {loading ? (
-              <Loader2 className="animate-spin" size={20} />
-            ) : (
-              <>
-                Sign Up
-                <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />
-              </>
-            )}
+            {loading
+              ? <Loader2 className="animate-spin" size={18} />
+              : <>{tab === 'register' ? 'Create Account' : 'Sign In'} <ArrowRight className="group-hover:translate-x-1 transition-transform" size={16} /></>
+            }
           </button>
         </form>
 
-        <p className="text-center mt-8 text-slate-500 text-sm font-medium">
-          Already have an account? <span className="text-primary font-bold cursor-pointer hover:underline">Log in</span>
+        <p className="text-center mt-6 text-[10px] font-bold opacity-40">
+          {tab === 'register' ? 'Already have an account? ' : "Don't have an account? "}
+          <button
+            onClick={() => switchTab(tab === 'register' ? 'login' : 'register')}
+            className="text-blue-400 font-black hover:underline opacity-100"
+          >
+            {tab === 'register' ? 'Sign In' : 'Sign Up'}
+          </button>
         </p>
-      </motion.div>
-    </div>
+      </div>
+    </motion.div>
   );
 }
