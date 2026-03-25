@@ -114,12 +114,12 @@ export default function App() {
             {view === 'home' && (
               <motion.div key="home" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-12">
                 <div className="rounded-[45px] glass-pod text-center p-12 lg:p-20 max-w-2xl mx-auto backdrop-blur-3x">
-                  <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="inline-block px-4 py-1 rounded-full bg-blue-500/10 text-red-500 text-[9px] font-black uppercase tracking-[0.2em] mb-6">Introducing Empiros</motion.div>
+                  <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="inline-block px-4 py-1 rounded-full bg-blue-500/10 text-red-500 text-[10px] font-black uppercase tracking-[0.2em] mb-6">Introducing Empiros</motion.div>
                   <h1 className="text-4xl lg:text-6xl font-black mb-6 leading-tight tracking-tighter">EMPIROS</h1>
                   <p className="text-sm lg:text-lg font-bold mb-10 opacity-70 tracking-tight lowercase">Build your network today</p>
                   <div className="flex flex-wrap justify-center gap-4">
-                    <button onClick={() => setView('prototype')} className="px-10 py-5 bg-green-600 text-white rounded-3xl text-[10px] font-black uppercase tracking-widest shadow-2xl shadow-blue-500/40 hover:scale-105 transition-transform">Get Started</button>
-                    <button onClick={() => setView('bundles')} className="px-10 py-5 bg-white/10 border border-white/5 rounded-3xl text-[10px] font-black uppercase tracking-widest backdrop-blur-md hover:bg-white/20 transition-all">Select Bundle</button>
+                    <button onClick={() => setView('prototype')} className="px-10 py-5 bg-green-600 text-white rounded-3xl text-[12px] font-black uppercase tracking-widest shadow-2xl shadow-blue-500/40 hover:scale-105 transition-all">Get Started</button>
+                    <button onClick={() => setView('bundles')} className="px-10 py-5 bg-white/10 border border-white/5 rounded-3xl text-[12px] font-black uppercase tracking-widest backdrop-blur-md hover:scale-105 transition-all">Select Bundle</button>
                   </div>
                 </div>
 
@@ -151,7 +151,7 @@ export default function App() {
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 group-hover:opacity-100 transition-opacity" />
                   <div className="text-center space-y-4 relative z-10">
                     <div className="w-20 h-20 rounded-3xl bg-blue-600/10 flex items-center justify-center mx-auto mb-6">
-                       <Zap className="text-blue-500" size={40} />
+                       <Zap className="text-purple-500" size={40} />
                     </div>
                     <h3 className="text-2xl font-black uppercase italic">Prototype Mode Active.</h3>
                     <p className="text-[11px] font-bold opacity-50 max-w-xs mx-auto">This represents the live scaling environment of Empiros. All nodes are ready for deployment.</p>
