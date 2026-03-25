@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --text-dark: #1e293b;
+  --text-muted: #64748b;
+  --hub-bg: rgba(255, 255, 255, 0.15);
+  --accent-green: rgba(167, 243, 208, 0.5);
+}
+
+.dark {
+  --glass-bg: rgba(15, 23, 42, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-dark: #f8fafc;
+  --text-muted: #94a3b8;
+  --hub-bg: rgba(0, 0, 0, 0.4);
+  --accent-green: rgba(6, 78, 59, 0.5);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #f8fafc;
+  color: var(--text-dark);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
+  transition: background 0.5s ease, color 0.5s ease;
+}
+
+.dark body {
+  background: #020617;
+}
+
+/* Optimized High-Performance Background */
+.bg-blobs {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  /* Reduced blur and added hardware acceleration */
+  filter: blur(70px);
+  transform: translateZ(0); 
+  will-change: transform;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.5;
+  transform: translateZ(0);
+  animation: move 25s infinite alternate ease-in-out;
+}
+
+.blob-1 { width: 40vw; height: 40vw; background: #6366f1; top: -10%; left: -10%; }
+.blob-2 { width: 45vw; height: 45vw; background: #6a10b9; top: 10%; right: -10%; }
+.blob-3 { width: 35vw; height: 35vw; background: #6a10b9; bottom: -10%; left: 10%; }
+.blob-4 { width: 40vw; height: 40vw; background: #b91073; bottom: 10%; right: 20%; }
+
+@keyframes move {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(30px, 30px) scale(1.05); }
+}
+
+/* Container Responsiveness */
+
+.glass-pod {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border-radius: 2.5rem;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+/* Feature Cards Grid */
+.feature-card {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}
+
+.feature-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));
+}
+
+.feature-title { 
+  font-weight: 800; 
+  font-size: clamp(1.3rem, 2vw, 0.75rem); 
+  text-transform: uppercase; 
+  letter-spacing: 0em; 
+  color: var(--text-dark); 
+}
+
+.feature-desc { 
+  font-size: clamp(1rem, 1.5vw, 0.65rem); 
+  color: var(--text-muted); 
+  line-height: 1; 
+}
+
+/* Optimized Buttons */
+.btn-glass-green {
+  background: var(--accent-green);
+  border: 1px solid var(--glass-border);
+  color: white; /* Matches picture better */
+  padding: 0.75rem 2rem;
+  border-radius: 2rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+  transition: transform 0.2s;
+}
+
+.btn-glass-green:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(167, 243, 208, 0.3);
+}
+
+.custom-scroll { overflow-y: auto; scrollbar-width: none; }
+.custom-scroll::-webkit-scrollbar { display: none; }
+
+@media (max-width: 768px) {
+  .hub-main { width: 100vw; height: 100vh; border-radius: 0; margin: 0; }
+  .feature-card { padding: 0.75rem; }
+}
