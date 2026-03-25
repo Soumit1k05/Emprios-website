@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import RegistrationPage from './components/RegistrationPage';
+import logo from './assets/Empiros_Logo.jpeg';
 import { 
   BarChart3, 
   Sun, Moon, Twitter, Facebook, Instagram, Youtube,
-  ArrowLeft, Search, Bell, Check, Zap, Star, Shield, Layers
+  ArrowLeft, Search, Bell, Check, Zap, Star, Shield, Layers,
+  UserPlus
 } from 'lucide-react';
 
 /* --- UI Components --- */
@@ -58,7 +61,7 @@ const BundleCard = ({ name, price, features, color, popular }) => (
 
 export default function App() {
   const [isDark, setIsDark] = useState(false);
-  const [view, setView] = useState('home'); // views: home, bundles, prototype
+  const [view, setView] = useState('home'); // views: home, bundles, prototype, register
 
   useEffect(() => {
     if (isDark) document.documentElement.classList.add('dark');
@@ -86,9 +89,14 @@ export default function App() {
             <button onClick={handleBack} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
               <ArrowLeft size={20} />
             </button>
-            <div className="flex items-center gap-3">
-               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-black italic shadow-2xl">E</div>
-               <span className="text-sm font-black uppercase tracking-[0.3em] text-inherit">EMPIROS</span>
+            <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setView('home')}>
+               <motion.img 
+                 whileHover={{ scale: 1.1 }}
+                 src={logo} 
+                 alt="Empiros Logo" 
+                 className="w-10 h-10 rounded-xl shadow-lg border border-white/10" 
+               />
+               <span className="text-sm font-black uppercase tracking-[0.3em] text-inherit group-hover:text-blue-500 transition-colors">EMPIROS</span>
             </div>
           </div>
 
@@ -96,7 +104,7 @@ export default function App() {
             <NavItem active={view === 'home'} onClick={() => setView('home')}>Home</NavItem>
             <NavItem active={view === 'bundles'} onClick={() => setView('bundles')}>Bundles</NavItem>
             <NavItem active={view === 'prototype'} onClick={() => setView('prototype')}>Dashboard</NavItem>
-            <NavItem onClick={() => alert('Account section coming soon!')}>Account</NavItem>
+            <NavItem active={view === 'register'} onClick={() => setView('register')}>Account</NavItem>
           </nav>
 
           <div className="flex items-center gap-2">
@@ -118,7 +126,7 @@ export default function App() {
                   <h1 className="text-4xl lg:text-6xl font-black mb-6 leading-tight tracking-tighter">EMPIROS</h1>
                   <p className="text-sm lg:text-lg font-bold mb-10 opacity-70 tracking-tight lowercase">Build your network today</p>
                   <div className="flex flex-wrap justify-center gap-4">
-                    <button onClick={() => setView('prototype')} className="px-10 py-5 bg-green-600 text-white rounded-3xl text-[12px] font-black uppercase tracking-widest shadow-2xl shadow-blue-500/40 hover:scale-105 transition-all">Get Started</button>
+                    <button onClick={() => setView('register')} className="px-10 py-5 bg-green-600 text-white rounded-3xl text-[12px] font-black uppercase tracking-widest shadow-2xl shadow-blue-500/40 hover:scale-105 transition-all">Get Started</button>
                     <button onClick={() => setView('bundles')} className="px-10 py-5 bg-white/10 border border-white/5 rounded-3xl text-[12px] font-black uppercase tracking-widest backdrop-blur-md hover:scale-105 transition-all">Select Bundle</button>
                   </div>
                 </div>
@@ -158,6 +166,12 @@ export default function App() {
                     <button onClick={() => setView('home')} className="text-[10px] font-black uppercase tracking-widest text-blue-500 border-b-2 border-blue-500 pb-1">Exit Prototype</button>
                   </div>
                 </div>
+              </motion.div>
+            )}
+
+            {view === 'register' && (
+              <motion.div key="register" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                <RegistrationPage />
               </motion.div>
             )}
           </AnimatePresence>

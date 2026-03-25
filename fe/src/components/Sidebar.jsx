@@ -1,5 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import logo from '../assets/Empiros_Logo.jpeg';
 import { 
   LayoutDashboard, ShoppingBag, Box, BarChart2, Users, 
   DollarSign, FileText, Percent, MessageCircle, Mail, 
@@ -27,9 +29,16 @@ export default function Sidebar() {
   return (
     <aside className="w-64 h-full flex flex-col pt-6 pb-6 px-4">
       {/* Logo */}
-      <div className="flex items-center gap-2 px-2 mb-6 text-primary">
-        <ShoppingCart size={28} />
-        <span className="font-bold text-xl text-slate-800">E-commerce</span>
+      <div className="flex items-center gap-3 px-2 mb-6 text-primary group cursor-pointer">
+        <motion.img 
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          whileHover={{ scale: 1.05 }}
+          src={logo} 
+          alt="Empiros Logo" 
+          className="h-9 w-auto rounded-lg shadow-sm group-hover:shadow-md transition-all"
+        />
+        <span className="font-bold text-xl text-slate-800 tracking-tight group-hover:text-primary transition-colors">Empiros</span>
       </div>
 
       {/* Search Bar */}
