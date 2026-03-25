@@ -34,26 +34,53 @@ const FeatureCard = ({ icon, title, desc, delay = 0 }) => (
   </motion.div>
 );
 
-const BundleCard = ({ name, price, features, color, popular }) => (
+const BundleCard = ({ name, price, features, color, popular, icon: Icon }) => (
   <motion.div 
-    whileHover={{ y: -10 }}
-    className={`glass-pod p-8 relative flex flex-col gap-6 ${popular ? 'border-blue-400 ring-2 ring-blue-400/20' : ''}`}
+    whileHover={{ y: -10, scale: 1.02 }}
+    className={`glass-pod p-8 relative flex flex-col gap-6 overflow-hidden transition-all duration-500 ${popular ? 'border-blue-400 ring-2 ring-blue-400/20 bg-blue-500/5' : ''}`}
   >
-    {popular && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Most Popular</div>}
-    <div className="space-y-1">
-      <h3 className="text-xl font-black uppercase tracking-tighter">{name}</h3>
-      <div className="text-3xl font-black">{price}<span className="text-xs opacity-40 font-bold">/mo</span></div>
+    {popular && (
+      <div className="absolute top-0 right-0 overflow-hidden w-24 h-24">
+        <div className="absolute top-4 -right-8 bg-blue-500 text-white text-[8px] font-black px-10 py-1 uppercase rotate-45 tracking-widest shadow-lg">Popular</div>
+      </div>
+    )}
+    
+    <div className="flex justify-between items-start">
+      <div className="p-3 rounded-2xl bg-white/5 border border-white/10 text-blue-500">
+        <Icon size={24} />
+      </div>
+      <div className="text-right">
+        <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Monthly</p>
+        <div className="text-3xl font-black">{price}<span className="text-xs opacity-40 font-bold">/mo</span></div>
+      </div>
     </div>
-    <ul className="space-y-3 flex-1">
+
+    <div>
+      <h3 className="text-2xl font-black uppercase tracking-tighter mb-2">{name}</h3>
+      <div className="h-1 w-12 bg-blue-500 rounded-full mb-4 opacity-50"></div>
+    </div>
+
+    <ul className="space-y-4 flex-1">
       {features.map((f, i) => (
-        <li key={i} className="flex items-center gap-3 text-[10px] font-bold opacity-70">
-          <Check size={12} className="text-blue-500" /> {f}
+        <li key={i} className="flex items-center gap-3 text-[11px] font-bold opacity-80 group/item">
+          <div className="w-5 h-5 rounded-full bg-blue-500/10 flex items-center justify-center group-hover/item:bg-blue-500/20 transition-colors">
+            <Check size={10} className="text-blue-500" />
+          </div>
+          {f}
         </li>
       ))}
     </ul>
-    <button className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${popular ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white/10 hover:bg-white/20'}`}>
-      Select {name}
-    </button>
+
+    <div className="pt-4 flex flex-col gap-3">
+      <button className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${popular ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/40 hover:bg-blue-700' : 'bg-white/10 hover:bg-white/20 border border-white/10'}`}>
+        Select {name}
+      </button>
+      <button className="w-full py-2 text-[8px] font-black uppercase tracking-[0.2em] opacity-40 hover:opacity-100 transition-opacity">
+        View Full Details
+      </button>
+    </div>
+    
+    <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-blue-500/5 blur-3xl rounded-full group-hover:bg-blue-500/10 transition-colors"></div>
   </motion.div>
 );
 
@@ -94,7 +121,7 @@ export default function App() {
                  whileHover={{ scale: 1.1 }}
                  src={logo} 
                  alt="Empiros Logo" 
-                 className="w-10 h-10 rounded-xl shadow-lg border border-white/10" 
+                 className="w-10 h-10 rounded-xl shadow-lg border border-white/10 object-contain p-1 bg-white/5" 
                />
                <span className="text-sm font-black uppercase tracking-[0.3em] text-inherit group-hover:text-blue-500 transition-colors">EMPIROS</span>
             </div>
@@ -124,7 +151,8 @@ export default function App() {
                 <div className="rounded-[45px] glass-pod text-center p-12 lg:p-20 max-w-2xl mx-auto backdrop-blur-3x">
                   <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="inline-block px-4 py-1 rounded-full bg-blue-500/10 text-red-500 text-[10px] font-black uppercase tracking-[0.2em] mb-6">Introducing Empiros</motion.div>
                   <h1 className="text-4xl lg:text-6xl font-black mb-6 leading-tight tracking-tighter">EMPIROS</h1>
-                  <p className="text-sm lg:text-lg font-bold mb-10 opacity-70 tracking-tight lowercase">Build your network today</p>
+                  <p className="text-sm lg:text-ellipsis mb-10 opacity-80 uppercase tracking-wider">Build your network today</p>
+
                   <div className="flex flex-wrap justify-center gap-4">
                     <button onClick={() => setView('register')} className="px-10 py-5 bg-green-600 text-white rounded-3xl text-[12px] font-black uppercase tracking-widest shadow-2xl shadow-blue-500/40 hover:scale-105 transition-all">Get Started</button>
                     <button onClick={() => setView('bundles')} className="px-10 py-5 bg-white/10 border border-white/5 rounded-3xl text-[12px] font-black uppercase tracking-widest backdrop-blur-md hover:scale-105 transition-all">Select Bundle</button>
@@ -140,15 +168,52 @@ export default function App() {
             )}
 
             {view === 'bundles' && (
-              <motion.div key="bundles" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="space-y-10">
-                <div className="text-center space-y-2">
-                  <h2 className="text-4xl font-black uppercase tracking-tighter italic">Select Your Bundle</h2>
-                  <p className="text-xs font-bold opacity-50 uppercase tracking-widest">Upgrade your network scaling capability</p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-10">
-                  <BundleCard name="Starter" price="$49" features={['5 Project Slots', 'Basic Analytics', '24/7 Support']} />
-                  <BundleCard name="Enterprise" price="$149" features={['Unlimited Slots', 'Advance AI Insights', 'Dedicated Manager']} popular />
-                  <BundleCard name="Custom" price="Contact" features={['White-label API', 'Custom Node Sync', 'Global CDN']} />
+              <motion.div key="bundles" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="space-y-16">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                  <div className="lg:col-span-4 space-y-6">
+                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="inline-block px-3 py-1 rounded-full bg-blue-500/10 text-blue-500 text-[8px] font-black uppercase tracking-widest border border-blue-500/20">Pricing Plans</motion.div>
+                    <h2 className="text-5xl font-black leading-none tracking-tighter italic">CHOOSE YOUR POWER</h2>
+                    <p className="text-sm font-bold opacity-60 leading-relaxed">Unlock the full potential of global network scaling with our precision-engineered bundles.</p>
+                    
+                    <div className="glass-pod p-6 space-y-4 bg-white/5 border-white/5">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center text-green-500"><Zap size={20} fill="currentColor" /></div>
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-widest">Instant Setup</p>
+                          <p className="text-[9px] font-bold opacity-40">Zero node latency</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-500"><Shield size={20} fill="currentColor" /></div>
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-widest">Encrypted</p>
+                          <p className="text-[9px] font-bold opacity-40">256-bit Node-to-Node</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-8 flex flex-col gap-6">
+                    <div className="relative glass-pod p-10 h-[240px] overflow-hidden group">
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent z-0"></div>
+                      <div className="relative z-10 flex h-full items-center justify-between">
+                        <div className="max-w-xs space-y-4">
+                          <h4 className="text-xl font-black uppercase italic tracking-tight">Bundle Preview</h4>
+                          <p className="text-[10px] font-bold opacity-60">Visualize your scaling potential before you commit. All bundles include our core NodeSync™ technology.</p>
+                          <button className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">Launch Preview</button>
+                        </div>
+                        <div className="w-48 h-full bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center group-hover:scale-105 transition-transform duration-700">
+                          <Layers size={80} className="text-blue-500 opacity-20" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <BundleCard icon={Zap} name="Starter" price="$49" features={['5 Project Slots', 'Basic Analytics', '24/7 Support']} />
+                      <BundleCard icon={Star} name="Enterprise" price="$149" features={['Unlimited Slots', 'Advance AI Insights', 'Dedicated Manager']} popular />
+                      <BundleCard icon={Shield} name="Custom" price="Contact" features={['White-label API', 'Custom Node Sync', 'Global CDN']} />
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             )}

@@ -6,7 +6,7 @@ import {
   LayoutDashboard, ShoppingBag, Box, BarChart2, Users, 
   DollarSign, FileText, Percent, MessageCircle, Mail, 
   Plus, Settings, HelpCircle, Moon, Search, ShoppingCart
-} from 'lucide-react';
+} from 'lucide-react'; 
 
 export default function Sidebar() {
   const mainMenu = [
@@ -36,7 +36,7 @@ export default function Sidebar() {
           whileHover={{ scale: 1.05 }}
           src={logo} 
           alt="Empiros Logo" 
-          className="h-9 w-auto rounded-lg shadow-sm group-hover:shadow-md transition-all"
+          className="h-9 w-9 rounded-lg shadow-sm group-hover:shadow-md transition-all object-contain p-0.5 bg-white/5"
         />
         <span className="font-bold text-xl text-slate-800 tracking-tight group-hover:text-primary transition-colors">Empiros</span>
       </div>
@@ -62,7 +62,7 @@ export default function Sidebar() {
             to={item.path}
             className={({ isActive }) => `
               flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
-              ${isActive ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}
+              ${isActive ? 'bg-primary text-yellow-500 shadow-md shadow-primary/20' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}
             `}
           >
             <item.icon size={18} />
