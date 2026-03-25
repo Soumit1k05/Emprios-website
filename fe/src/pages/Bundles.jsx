@@ -1,5 +1,6 @@
 import React from 'react';
 import { Layers, Zap, Star, Shield, Check } from 'lucide-react';
+import { bundlesContent } from '../config/content';
 
 const Widget = ({ children, className = '' }) => (
   <div className={`bg-white/60 backdrop-blur-md rounded-[32px] shadow-sm border border-white/50 p-8 ${className}`}>
@@ -8,17 +9,12 @@ const Widget = ({ children, className = '' }) => (
 );
 
 export default function Bundles() {
-  const bundles = [
-    { name: 'Basic', price: '$49', icon: Layers, features: ['5 Marketing Nodes', 'Standard Analytics', 'Email Support', 'Basic AI Templates'], tag: 'Starter' },
-    { name: 'Pro', price: '$99', icon: Zap, features: ['20 Marketing Nodes', 'Deep Insights', 'Priority Chat', 'Custom Workflows'], tag: 'Most Popular', popular: true },
-    { name: 'Premium', price: '$199', icon: Star, features: ['Unlimited Nodes', 'Global Sync', 'Account Manager', 'White-label Logic'], tag: 'Enterprise' },
-    { name: 'Legendary', price: '$499', icon: Shield, features: ['Full Tech Stack', 'Private Hosting', 'Custom Feature Dev', '0% Fees'], tag: 'The Ultimate' }
-  ];
+  const bundles = bundlesContent;
 
   return (
     <div className="flex-1 overflow-y-auto custom-scroll p-6 pb-20">
       <div className="text-left mb-10 px-4">
-        <h1 className="text-4xl font-bold text-slate-800 tracking-tight mb-3">Choose Your Power</h1>
+        <h1 className="text-4xl text-slate-800 tracking-tight mb-3">Choose Your Power</h1>
         <p className="text-slate-500 font-medium text-lg">Select a bundle that fits your ambition.</p>
       </div>
 

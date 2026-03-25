@@ -1,0 +1,16 @@
+{
+  "name": "empiros-website",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install-all": "npm install && cd fe && npm install && cd ../be && npm install",
+    "dev": "concurrently \"npm run dev --prefix fe\" \"npm run dev --prefix be\"",
+    "build": "cd fe && npm run build",
+    "start": "cd be && npm start",
+    "lint": "cd fe && npm run lint",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

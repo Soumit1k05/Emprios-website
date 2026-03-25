@@ -2,17 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import RegistrationPage from './components/RegistrationPage';
 import logo from './assets/Empiros_Logo.jpeg';
-import { 
-  BarChart3, 
+import {
+  BarChart3,
   Sun, Moon, Twitter, Facebook, Instagram, Youtube,
   ArrowLeft, Search, Bell, Check, Zap, Star, Shield, Layers,
   UserPlus
 } from 'lucide-react';
+import { siteMetadata } from './config/content';
 
 /* --- UI Components --- */
 
 const NavItem = ({ children, active, onClick }) => (
-  <button 
+  <button
     onClick={onClick}
     className={`text-[10px] font-black uppercase tracking-[0.2em] transition-all ${active ? 'text-blue-500 opacity-100' : 'text-inherit opacity-60 hover:opacity-100'}`}
   >
@@ -149,9 +150,9 @@ export default function App() {
             {view === 'home' && (
               <motion.div key="home" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-12">
                 <div className="rounded-[45px] glass-pod text-center p-12 lg:p-20 max-w-2xl mx-auto backdrop-blur-3x">
-                  <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="inline-block px-4 py-1 rounded-full bg-blue-500/10 text-red-500 text-[10px] font-black uppercase tracking-[0.2em] mb-6">Introducing Empiros</motion.div>
-                  <h1 className="text-4xl lg:text-6xl font-black mb-6 leading-tight tracking-tighter">EMPIROS</h1>
-                  <p className="text-sm lg:text-ellipsis mb-10 opacity-80 uppercase tracking-wider">Build your network today</p>
+                  <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="inline-block px-4 py-1 rounded-full bg-blue-500/10 text-red-500 text-[10px] font-black uppercase tracking-[0.2em] mb-6">Introducing {siteMetadata.title}</motion.div>
+                  <h1 className="text-4xl lg:text-6xl font-black mb-6 leading-tight tracking-tighter">{siteMetadata.title}</h1>
+                  <p className="text-sm lg:text-ellipsis mb-10 opacity-80 uppercase tracking-wider">{siteMetadata.tagline}</p>
 
                   <div className="flex flex-wrap justify-center gap-4">
                     <button onClick={() => setView('register')} className="px-10 py-5 bg-green-600 text-white rounded-3xl text-[12px] font-black uppercase tracking-widest shadow-2xl shadow-blue-500/40 hover:scale-105 transition-all">Get Started</button>

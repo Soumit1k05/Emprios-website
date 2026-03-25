@@ -1,2 +1,18 @@
+# Node dependencies
 node_modules/
+fe/node_modules/
+be/node_modules/
+
+# Build outputs
+fe/dist/
+dist/
+
+# Environment variables
 .env
+be/.env
+fe/.env
+
+# Local settings
+.vscode/
+.DS_Store
+*.local
