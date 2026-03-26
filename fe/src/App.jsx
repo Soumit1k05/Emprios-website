@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Sun, Moon, Twitter, Facebook, Instagram, Youtube,
-  ArrowLeft, Check, Zap
+  ArrowLeft, Check, User
 } from 'lucide-react';
 import BundleList from './pages/BundleList';
 import BundleDetail from './pages/BundleDetail';
 import BundleSuccess from './pages/BundleSuccess';
 import PaymentPage from './pages/PaymentPage';
 import Dashboard from './pages/Dashboard';
+import AccountPage from './pages/AccountPage';
+import AffiliatePage from './pages/Affiliate.jsx';
+import AuthPage from './components/RegistrationPage';
+import { useAuth } from './context/AuthContext';
+import Logo from './assets/Empiros_Logo.jpeg';
 import './App.css';
-
 
 const NavItem = ({ children, active, onClick }) => (
   <button 
@@ -36,30 +40,8 @@ const FeatureCard = ({ icon, title, desc, delay = 0 }) => (
   </motion.div>
 );
 
-const BundleCard = ({ name, price, features, popular }) => (
-  <motion.div 
-    whileHover={{ y: -10 }}
-    className={`glass-pod p-8 relative flex flex-col gap-6 ${popular ? 'border-blue-400 ring-2 ring-blue-400/20' : ''}`}
-  >
-    {popular && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Most Popular</div>}
-    <div className="space-y-1">
-      <h3 className="text-xl font-black uppercase tracking-tighter">{name}</h3>
-      <div className="text-3xl font-black">{price}<span className="text-xs opacity-40 font-bold">/mo</span></div>
-    </div>
-    <ul className="space-y-3 flex-1">
-      {features.map((f, i) => (
-        <li key={i} className="flex items-center gap-3 text-[10px] font-bold opacity-70">
-          <Check size={12} className="text-blue-500" /> {f}
-        </li>
-      ))}
-    </ul>
-    <button className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${popular ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white/10 hover:bg-white/20'}`}>
-      Select {name}
-    </button>
-  </motion.div>
-);
-
 function AppContent() {
+  const { user, logout } = useAuth();
   const [isDark, setIsDark] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -70,15 +52,12 @@ function AppContent() {
   }, [isDark]);
 
   const handleBack = () => {
-    if (location.pathname !== '/') {
-      navigate(-1);
-    } else {
-      window.history.back();
-    }
+    if (location.pathname !== '/') navigate(-1);
+    else window.history.back();
   };
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center p-2 lg:p-8 overflow-hidden relative">
+    <div className="w-full min-h-screen flex items-center justify-center p-2 lg:p-4 overflow-hidden relative">
       <div className="bg-blobs">
         <div className="blob blob-1" />
         <div className="blob blob-2" />
@@ -86,16 +65,16 @@ function AppContent() {
         <div className="blob blob-4" />
       </div>
 
-      <motion.div layout className="hub-main w-full max-h-[95vh] flex flex-col">
+      <motion.div layout className="hub-main w-full max-h-[95vh] flex flex-col bg-white/5 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-2xl overflow-hidden">
         {/* Header */}
-        <header className="h-[75px] px-8 flex items-center justify-between border-b border-white/10 shrink-0">
+        <header className="h-[80px] px-8 flex items-center justify-between border-b border-white/5 shrink-0">
           <div className="flex items-center gap-6">
             <button onClick={handleBack} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
               <ArrowLeft size={20} />
             </button>
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-black italic shadow-2xl">E</div>
-               <span className="text-sm font-black uppercase tracking-[0.3em] text-inherit">EMPIROS</span>
+            <div className="flex items-center gap-4 cursor-pointer group" onClick={() => navigate('/')}>
+               <img src={Logo} alt="Empiros Logo" className="w-10 h-10 rounded-xl shadow-lg border border-white/10 group-hover:scale-110 transition-transform" />
+               <span className="hidden sm:block text-xs font-black uppercase tracking-[0.4em] opacity-80 group-hover:opacity-100 transition-opacity">EMPIROS</span>
             </div>
           </div>
 
@@ -103,82 +82,75 @@ function AppContent() {
             <NavItem active={location.pathname === '/'} onClick={() => navigate('/')}>Home</NavItem>
             <NavItem active={location.pathname === '/bundles'} onClick={() => navigate('/bundles')}>Bundles</NavItem>
             <NavItem active={location.pathname === '/dashboard'} onClick={() => navigate('/dashboard')}>Dashboard</NavItem>
-            <NavItem onClick={() => alert('Account section coming soon!')}>Account</NavItem>
+            {user && (
+              <NavItem active={location.pathname === '/affiliate'} onClick={() => navigate('/affiliate')}>Affiliates</NavItem>
+            )}
+            <NavItem active={location.pathname === '/account'} onClick={() => navigate(user ? '/account' : '/auth')}>
+              {user ? 'Account' : 'Sign In'}
+            </NavItem>
           </nav>
 
-          <div className="flex items-center gap-2">
-            <div className="w-14 h-7 rounded-full bg-white/10 border border-white/20 p-1 flex items-center cursor-pointer relative" onClick={() => setIsDark(!isDark)}>
-               <motion.div animate={{ x: isDark ? 28 : 0 }} className="absolute w-5 h-5 bg-white rounded-full shadow-md flex items-center justify-center">
-                 {isDark ? <Moon size={10} className="text-indigo-900" /> : <Sun size={10} className="text-amber-500" />}
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-6 rounded-full bg-white/10 border border-white/20 p-1 flex items-center cursor-pointer relative" onClick={() => setIsDark(!isDark)}>
+               <motion.div animate={{ x: isDark ? 24 : 0 }} className="absolute w-4 h-4 bg-white rounded-full shadow-md flex items-center justify-center">
+                 {isDark ? <Moon size={8} className="text-indigo-900" /> : <Sun size={8} className="text-amber-500" />}
                </motion.div>
             </div>
+            {user && (
+              <button onClick={() => navigate('/account')} className="w-10 h-10 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 hover:bg-blue-600/30 transition-all">
+                <User size={18} />
+              </button>
+            )}
           </div>
         </header>
 
         {/* Dynamic Content */}
-        <main className="flex-1 p-6 lg:p-12 custom-scroll overflow-y-auto">
+        <main className="flex-1 p-6 lg:p-10 custom-scroll overflow-y-auto">
           <AnimatePresence mode="wait">
             <Routes>
               <Route path="/" element={
                 <motion.div key="home" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-12">
-                  <div className="rounded-[45px] glass-pod text-center p-12 lg:p-20 max-w-2xl mx-auto backdrop-blur-3x">
-                    <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="inline-block px-4 py-1 rounded-full bg-blue-500/10 text-red-500 text-[9px] font-black uppercase tracking-[0.2em] mb-6">Introducing Empiros</motion.div>
-                    <h1 className="text-4xl lg:text-6xl font-black mb-6 leading-tight tracking-tighter">EMPIROS</h1>
-                    <p className="text-sm lg:text-lg font-bold mb-10 opacity-70 tracking-tight lowercase">Build your network today</p>
-                    <div className="flex flex-wrap justify-center gap-4">
-                      <button onClick={() => navigate('/bundles')} className="px-10 py-5 bg-green-600 text-white rounded-3xl text-[10px] font-black uppercase tracking-widest shadow-2xl shadow-blue-500/40 hover:scale-105 transition-transform">Get Started</button>
-                      <button onClick={() => navigate('/bundles')} className="px-10 py-5 bg-white/10 border border-white/5 rounded-3xl text-[10px] font-black uppercase tracking-widest backdrop-blur-md hover:bg-white/20 transition-all">Browse Bundles</button>
+                  <div className="rounded-[45px] glass-pod text-center p-12 lg:p-20 max-w-2xl mx-auto backdrop-blur-3xl border border-white/20">
+                    <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="inline-block px-4 py-1.5 rounded-full bg-blue-500/10 text-blue-400 text-[9px] font-black uppercase tracking-[0.2em] mb-8 border border-blue-500/20">Empowering Your Agency</motion.div>
+                    <h1 className="text-5xl lg:text-7xl font-black mb-8 leading-tight tracking-tighter bg-gradient-to-b from-inherit to-inherit/50 bg-clip-text">EMPIROS</h1>
+                    <p className="text-sm lg:text-lg font-bold mb-12 opacity-50 tracking-tight max-w-md mx-auto leading-relaxed">The ultimate hub for high-performance marketing and affiliate networking.</p>
+                    <div className="flex flex-wrap justify-center gap-5">
+                      <button onClick={() => navigate('/bundles')} className="px-10 py-5 bg-blue-600 text-white rounded-3xl text-[10px] font-black uppercase tracking-widest shadow-2xl shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all">Get Started</button>
+                      <button onClick={() => navigate('/bundles')} className="px-10 py-5 bg-white/5 border border-white/10 rounded-3xl text-[10px] font-black uppercase tracking-widest backdrop-blur-md hover:bg-white/15 active:scale-95 transition-all">Explore Bundles</button>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                    <FeatureCard icon="🌏" title="Global Reach" desc="Expand your horizons." delay={1} />
-                    <FeatureCard icon="📊" title="Deep Data" desc="Analyze every metric." delay={2} />
-                    <FeatureCard icon="⚡" title="Hyper Sync" desc="Real-time precision." delay={3} />
+                    <FeatureCard icon="🌏" title="Global Scale" desc="Expand your reach instantly." delay={1} />
+                    <FeatureCard icon="📊" title="Analytics" desc="Precision data tracking." delay={2} />
+                    <FeatureCard icon="⚡" title="Turbo Flow" desc="Automated revenue streams." delay={3} />
                   </div>
                 </motion.div>
               } />
 
-              <Route path="/bundles" element={
-                <motion.div key="bundles" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}>
-                  <BundleList />
-                </motion.div>
-              } />
-
-              <Route path="/bundle/:id" element={
-                <motion.div key="bundle-detail" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <BundleDetail />
-                </motion.div>
-              } />
-
-              <Route path="/bundle/:id/success" element={
-                <motion.div key="bundle-success" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <BundleSuccess />
-                </motion.div>
-              } />
-
-              <Route path="/payment/:id" element={
-                <motion.div key="payment" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <PaymentPage />
-                </motion.div>
-              } />
-
-
-              <Route path="/dashboard" element={
-                <motion.div key="dashboard" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full">
-                  <Dashboard />
-                </motion.div>
-              } />
+              <Route path="/auth" element={user ? <Navigate to="/account" /> : <AuthPage onSuccess={() => navigate('/account')} />} />
+              <Route path="/bundles" element={<BundleList />} />
+              <Route path="/bundle/:id" element={<BundleDetail />} />
+              <Route path="/bundle/:id/success" element={<BundleSuccess />} />
+              <Route path="/payment/:id" element={<PaymentPage />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/account" element={user ? <AccountPage onLogout={() => navigate('/')} /> : <Navigate to="/auth" />} />
+              <Route path="/affiliate" element={user ? <AffiliatePage /> : <Navigate to="/auth" />} />
             </Routes>
           </AnimatePresence>
         </main>
 
-        <footer className="h-[60px] px-8 flex items-center justify-between border-t border-white/10 shrink-0">
-          <div className="flex gap-6 opacity-40 text-[9px] font-black uppercase tracking-widest">
-            <span>Terms</span><span>Privacy</span><span>Contact</span>
+        <footer className="h-[65px] px-8 flex items-center justify-between border-t border-white/5 shrink-0 bg-black/5">
+          <div className="flex gap-8 opacity-40 text-[9px] font-black uppercase tracking-widest">
+            <span className="hover:opacity-100 cursor-pointer transition-opacity">Terms</span>
+            <span className="hover:opacity-100 cursor-pointer transition-opacity">Privacy</span>
+            <span className="hover:opacity-100 cursor-pointer transition-opacity">Support</span>
           </div>
-          <div className="flex gap-4 opacity-40 scale-90">
-            <Twitter size={16} /> <Facebook size={16} /> <Instagram size={16} /> <Youtube size={16} />
+          <p className="text-[8px] font-black uppercase tracking-[0.3em] opacity-20">© 2026 EMPIROS PLATFORM</p>
+          <div className="flex gap-5 opacity-40 scale-90">
+            <Twitter size={16} className="hover:text-blue-400 cursor-pointer transition-colors" /> 
+            <Instagram size={16} className="hover:text-pink-400 cursor-pointer transition-colors" /> 
+            <Youtube size={16} className="hover:text-red-500 cursor-pointer transition-colors" />
           </div>
         </footer>
       </motion.div>

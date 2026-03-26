@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, User, Phone, Building2, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import Logo from '../assets/Empiros_Logo.jpeg';
 
 const InputField = ({ icon: Icon, label, name, type = 'text', placeholder, value, onChange, required = false, minLength }) => (
   <div className="space-y-1.5">
@@ -87,9 +88,7 @@ export default function AuthPage({ onSuccess }) {
       <div className="glass-pod p-10">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-black text-2xl italic mx-auto mb-4 shadow-lg shadow-blue-500/30">
-            E
-          </div>
+          <img src={Logo} alt="Empiros Logo" className="w-20 h-20 rounded-2xl mx-auto mb-4 shadow-xl shadow-blue-500/20" />
           <h2 className="text-2xl font-black uppercase tracking-tighter">
             {tab === 'register' ? 'Create Account' : 'Welcome Back'}
           </h2>

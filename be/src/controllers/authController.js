@@ -13,8 +13,13 @@ const userResponse = (user, token) => ({
   isActive: user.isActive,
   lastLogin: user.lastLogin,
   createdAt: user.createdAt,
+  affiliateCode: user.affiliateCode,
+  referrals: user.referrals,
+  earnings: user.earnings,
+  payouts: user.payouts,
   token,
 });
+
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -121,3 +126,48 @@ export const updateUserProfile = async (req, res) => {
     res.status(500).json({ message: 'Profile update failed', error: error.message });
   }
 };
+
+// @desc    Generate User Affiliate Code
+// @route   POST /api/auth/affiliate/generate
+// @access  Private
+export const generateAffiliateCode = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    
+    if (user.affiliateCode) return res.status(400).json({ message: 'Already an affiliate' });
+
+    // Generate code from name + random suffix
+    const baseCode = user.name.replace(/\s+/g, '').toUpperCase().slice(0, 6);
+    user.affiliateCode = `${baseCode}${Math.floor(1000 + Math.random() * 9000)}`;
+    
+    await user.save();
+    res.json(userResponse(user, generateToken(user._id, user.role)));
+  } catch (error) {
+    res.status(500).json({ message: 'Code generation failed', error: error.message });
+  }
+};
+
+// @desc    Request Affiliate Payout
+// @route   POST /api/auth/affiliate/payout
+// @access  Private
+export const requestPayout = async (req, res) => {
+  try {
+    const { amount, method } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (amount > user.earnings) {
+      return res.status(400).json({ message: 'Insufficient earnings' });
+    }
+
+    user.payouts.push({ amount, method, status: 'pending' });
+    user.earnings -= amount;
+    
+    await user.save();
+    res.json(userResponse(user, generateToken(user._id, user.role)));
+  } catch (error) {
+    res.status(500).json({ message: 'Payout request failed', error: error.message });
+  }
+};
+

@@ -48,9 +48,37 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    affiliateCode: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    referrals: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+    earnings: {
+      type: Number,
+      default: 0,
+    },
+    payouts: [
+      {
+        amount: { type: Number, required: true },
+        method: { type: String, required: true },
+        status: {
+          type: String,
+          enum: ['pending', 'completed', 'rejected'],
+          default: 'pending',
+        },
+        date: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );
+
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {
