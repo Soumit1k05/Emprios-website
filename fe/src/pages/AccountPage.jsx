@@ -3,8 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   User, Mail, Shield, LogOut, Phone, Building2,
   FileText, Calendar, Clock, CheckCircle2, Pencil, X, Save, Loader2,
+  Sparkles, ArrowRight
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+
 
 const DetailRow = ({ icon: Icon, label, value }) => (
   <div className="flex items-start gap-4 py-4 border-b border-white/10 last:border-0">
@@ -203,8 +206,27 @@ export default function AccountPage({ onLogout }) {
         )}
       </AnimatePresence>
 
+      {/* ── Affiliate Access Card ── */}
+      <Link to="/affiliate" className="block group">
+        <div className="glass-pod p-6 flex items-center justify-between bg-gradient-to-r from-blue-600/10 to-indigo-600/10 border border-blue-500/20 group-hover:bg-blue-600/20 transition-all duration-300">
+           <div className="flex items-center gap-5">
+              <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
+                <Sparkles size={22} />
+              </div>
+              <div>
+                 <h3 className="text-sm font-black uppercase tracking-tight flex items-center gap-2">
+                    Partner Program <span className="px-2 py-0.5 rounded-full bg-blue-500 text-[8px] font-black uppercase tracking-widest text-white">Earn 60%</span>
+                 </h3>
+                 <p className="text-[10px] opacity-50 font-bold uppercase tracking-widest mt-0.5">Manage your referrals and payouts</p>
+              </div>
+           </div>
+           <ArrowRight size={20} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all" />
+        </div>
+      </Link>
+
       {/* ── Account Details ── */}
       <div className="glass-pod p-8">
+
         <h3 className="text-[10px] font-black uppercase tracking-widest opacity-50 mb-2">Account Information</h3>
         <DetailRow icon={User}      label="Full Name"    value={user?.name} />
         <DetailRow icon={Mail}      label="Email Address" value={user?.email} />
