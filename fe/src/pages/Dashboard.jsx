@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { MoreVertical, ArrowUp, ArrowDown, ChevronDown, Copy, Check, Users, DollarSign, BarChart3, ExternalLink } from 'lucide-react';
+import React from 'react';
+import { MoreVertical, ArrowUp, ArrowDown, ChevronDown } from 'lucide-react';
 
 const Widget = ({ children, className = '' }) => (
   <div className={`bg-white/60 backdrop-blur-md rounded-2xl shadow-sm border border-white/50 p-6 ${className}`}>
@@ -8,101 +8,78 @@ const Widget = ({ children, className = '' }) => (
 );
 
 export default function Dashboard() {
-  const [copied, setCopied] = useState(false);
-  const affiliateId = "AFF-001"; // Mock affiliate ID
-  const referralLink = `${window.location.origin}?ref=${affiliateId}`;
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(referralLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   return (
-    <div className="flex-1 overflow-y-auto custom-scroll p-6 pb-20 space-y-8">
-      {/* Header section with Link Generator */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-        <div className="space-y-1">
-          <h2 className="text-3xl font-black uppercase italic tracking-tighter">Affiliate Hub</h2>
-          <p className="text-sm font-bold opacity-50">Welcome back, Partner. You're earning 60% on every sale.</p>
-        </div>
-        
-        <div className="w-full lg:w-auto flex flex-col sm:flex-row items-center gap-4 bg-blue-500/10 p-3 pr-4 rounded-3xl border border-blue-500/20">
-          <div className="flex flex-col px-4 text-left">
-            <span className="text-[10px] font-black uppercase text-blue-500 opacity-60">Personal Referral Link</span>
-            <span className="text-xs font-bold truncate max-w-[200px]">{referralLink}</span>
-          </div>
-          <button 
-            onClick={copyToClipboard}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-colors shrink-0"
-          >
-            {copied ? <><Check size={14} /> Copied</> : <><Copy size={14} /> Copy Link</>}
-          </button>
-        </div>
-      </div>
-
-      {/* Main Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Widget className="flex flex-col justify-between h-44 bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
-          <div className="flex justify-between items-start opacity-80">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em]">Total Earnings</h3>
-            <DollarSign size={20} />
+    <div className="flex-1 overflow-y-auto custom-scroll p-6 pb-20">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        {/* Metric 1 */}
+        <Widget className="flex flex-col justify-between h-40">
+          <div className="flex justify-between items-start">
+            <h3 className="text-sm font-bold text-slate-700">Today's Sale</h3>
+            <button className="text-slate-400 hover:text-slate-600"><MoreVertical size={16} /></button>
           </div>
           <div>
-             <div className="text-4xl font-black italic">₹84,290</div>
-             <div className="flex items-center gap-1 mt-3 text-[10px] font-bold opacity-80">
-                <ArrowUp size={14} className="text-green-400" />
-                <span className="text-green-400">+12.5%</span>
-                this week
-             </div>
-          </div>
-        </Widget>
-
-        <Widget className="flex flex-col justify-between h-44">
-           <div className="flex justify-between items-start">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Total Referrals</h3>
-            <Users size={20} className="text-blue-500" />
-          </div>
-          <div>
-             <div className="text-4xl font-black text-slate-800 tracking-tighter">1,284</div>
-             <div className="flex items-center gap-1 mt-3 text-[10px] font-bold text-slate-500">
+             <div className="text-3xl font-black text-slate-800">$12,426</div>
+             <div className="flex items-center gap-1 mt-2 text-xs font-semibold text-slate-500">
                 <ArrowUp size={14} className="text-green-500" />
-                <span className="text-green-500">+8</span>
-                new today
+                <span className="text-green-500">+36%</span>
+                vs last month
              </div>
           </div>
         </Widget>
 
-        <Widget className="flex flex-col justify-between h-44">
+        {/* Metric 2 */}
+        <Widget className="flex flex-col justify-between h-40">
            <div className="flex justify-between items-start">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Conversion Rate</h3>
-            <BarChart3 size={20} className="text-blue-500" />
+            <h3 className="text-sm font-bold text-slate-700">Total Sales</h3>
+            <button className="text-slate-400 hover:text-slate-600"><MoreVertical size={16} /></button>
           </div>
           <div>
-             <div className="text-4xl font-black text-slate-800 tracking-tighter">6.82%</div>
-             <div className="flex items-center gap-1 mt-3 text-[10px] font-bold text-slate-500">
+             <div className="text-3xl font-black text-slate-800">$2,38,485</div>
+             <div className="flex items-center gap-1 mt-2 text-xs font-semibold text-slate-500">
                 <ArrowDown size={14} className="text-red-500" />
-                <span className="text-red-500">-0.4%</span>
-                vs avg.
+                <span className="text-red-500">-14%</span>
+                vs last month
+             </div>
+          </div>
+        </Widget>
+
+        {/* Metric 3 */}
+        <Widget className="flex flex-col justify-between h-40">
+           <div className="flex justify-between items-start">
+            <h3 className="text-sm font-bold text-slate-700">Total Orders</h3>
+            <button className="text-slate-400 hover:text-slate-600"><MoreVertical size={16} /></button>
+          </div>
+          <div>
+             <div className="text-3xl font-black text-slate-800">84,382</div>
+             <div className="flex items-center gap-1 mt-2 text-xs font-semibold text-slate-500">
+                <ArrowUp size={14} className="text-green-500" />
+                <span className="text-green-500">+36%</span>
+                vs last month
              </div>
           </div>
         </Widget>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Performance Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Sales Report Chart */}
         <Widget className="col-span-2 relative h-80 flex flex-col">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-800">Earnings History</h3>
-            <div className="flex items-center gap-4 text-[9px] font-black">
-              <button className="text-blue-600 bg-blue-500/10 px-3 py-1 rounded-full uppercase tracking-widest">30 Days</button>
-              <button className="opacity-40 uppercase tracking-widest">Prev. Quarter</button>
+            <h3 className="text-base font-bold text-slate-800">Sales Report</h3>
+            <div className="flex items-center gap-4 text-xs font-semibold text-slate-500">
+              <button className="text-primary bg-primary/10 px-3 py-1 rounded-full">12 MONTHS</button>
+              <button className="hover:text-slate-800">6 MONTHS</button>
+              <button className="hover:text-slate-800">30 DAYS</button>
+              <button className="hover:text-slate-800">7 DAYS</button>
+              <button className="flex items-center gap-1 border border-slate-200 px-3 py-1 rounded-full bg-white text-slate-700 ml-4"><span className="font-bold">EXPORT PDF</span></button>
             </div>
           </div>
-          <div className="flex-1 w-full flex items-end relative overflow-hidden px-2">
-             <svg viewBox="0 0 100 40" className="w-full h-full overflow-visible" preserveAspectRatio="none">
-               <path d="M0,35 Q10,32 20,38 T40,25 T60,10 T80,18 T100,2" fill="none" stroke="#2563eb" strokeWidth="2" />
-               <path d="M0,35 Q10,32 20,38 T40,25 T60,10 T80,18 T100,2 V40 H0 Z" fill="url(#gradient-blue)" />
+          <div className="flex-1 w-full flex items-end relative overflow-hidden">
+             {/* Mocking a line chart */}
+             <svg viewBox="0 0 100 40" className="w-full h-full overflow-visible preserve-3d" preserveAspectRatio="none">
+               <path d="M0,35 Q10,30 20,38 T40,25 T60,10 T80,15 T100,5" fill="none" stroke="#2563eb" strokeWidth="1" />
+               <path d="M0,35 Q10,30 20,38 T40,25 T60,10 T80,15 T100,5" fill="url(#gradient-blue)" />
+               <path d="M0,30 Q15,35 30,20 T50,25 T70,5 T90,20 T100,10" fill="none" stroke="#eab308" strokeWidth="1" />
+               
                <defs>
                  <linearGradient id="gradient-blue" x1="0" y1="0" x2="0" y2="1">
                    <stop offset="0%" stopColor="#2563eb" stopOpacity="0.2"/>
@@ -111,26 +88,29 @@ export default function Dashboard() {
                </defs>
              </svg>
           </div>
-          <div className="flex justify-between text-[9px] font-black text-slate-400 mt-4 px-2 tracking-widest uppercase">
-            {['1 Mar','5 Mar','10 Mar','15 Mar','20 Mar','25 Mar','Today'].map(m => <span key={m}>{m}</span>)}
+          <div className="flex justify-between text-[11px] font-bold text-slate-400 mt-4 px-2">
+            {['Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan'].map(m => <span key={m}>{m}</span>)}
           </div>
         </Widget>
 
-        {/* Traffic Breakdown */}
+        {/* Traffic Sources */}
         <Widget className="flex flex-col">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-800">Referral Sources</h3>
-            <div className="text-[10px] font-black uppercase text-blue-600">Views</div>
+            <h3 className="text-base font-bold text-slate-800">Traffic Sources</h3>
+            <button className="flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-slate-800">
+               LAST 7 DAYS <ChevronDown size={14} />
+            </button>
           </div>
           <div className="space-y-6 flex-1 flex flex-col justify-center">
             {[
-              { label: 'Instagram Ads', val: '14,382', pct: '75%', color: 'bg-blue-500' },
-              { label: 'YouTube Review', val: '8,974', pct: '50%', color: 'bg-indigo-500' },
-              { label: 'Twitter X', val: '4,211', pct: '25%', color: 'bg-blue-400' },
-              { label: 'Facebook Groups', val: '1,893', pct: '12%', color: 'bg-blue-300' }
+              { label: 'Direct', val: '1,43,382', pct: '75%', color: 'bg-primary' },
+              { label: 'Referral', val: '87,974', pct: '50%', color: 'bg-primary' },
+              { label: 'Social Media', val: '45,211', pct: '25%', color: 'bg-primary' },
+              { label: 'Twitter', val: '21,893', pct: '12%', color: 'bg-primary' },
+              { label: 'Facebook', val: '21,893', pct: '12%', color: 'bg-primary' }
             ].map((t,i) => (
               <div key={i} className="flex flex-col gap-2">
-                <div className="flex justify-between text-[10px] font-black uppercase italic text-slate-600">
+                <div className="flex justify-between text-xs font-semibold text-slate-600">
                   <span>{t.label}</span>
                   <span>{t.val}</span>
                 </div>
@@ -143,52 +123,95 @@ export default function Dashboard() {
         </Widget>
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
-         {/* Recent Referrals Table */}
-         <Widget className="flex flex-col overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+         {/* Total Bets (Pie Chart Placeholder) */}
+         <Widget className="flex flex-col">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xs font-black uppercase tracking-widest text-slate-800">Recent Sales Activity</h3>
-              <button className="text-[10px] font-black uppercase tracking-widest text-blue-600">Export Report</button>
+              <h3 className="text-base font-bold text-slate-800">Total Bets</h3>
+              <button className="text-slate-400 hover:text-slate-600"><MoreVertical size={16} /></button>
+            </div>
+            <div className="flex-1 flex flex-col items-center justify-center py-6">
+               <div className="relative w-48 h-48 flex items-center justify-center mb-8">
+                  {/* Mock CSS Pie Chart */}
+                  <div className="w-full h-full rounded-full bg-blue-500 absolute clip-half"></div>
+                  <div className="w-32 h-32 rounded-full bg-yellow-400 absolute top-0 right-0 shadow-lg flex items-center justify-center text-white font-bold text-sm">20%</div>
+                  <div className="w-24 h-24 rounded-full bg-orange-500 absolute bottom-4 right-4 shadow-lg flex items-center justify-center text-white font-bold text-sm">10%</div>
+                  <div className="absolute left-8 text-white font-black text-2xl">70%</div>
+               </div>
+               <div className="w-full space-y-4">
+                 {[
+                   { label: 'Mobile', val: '$50,280', color: 'bg-blue-500' },
+                   { label: 'Leptop', val: '$30,160', color: 'bg-yellow-400' },
+                   { label: 'watch', val: '$15,520', color: 'bg-orange-500' }
+                 ].map(item => (
+                   <div key={item.label} className="flex justify-between text-xs font-bold text-slate-600">
+                     <span className="flex items-center gap-2"><div className={`w-2 h-2 rounded-full ${item.color}`} /> {item.label}</span>
+                     <span>{item.val}</span>
+                   </div>
+                 ))}
+               </div>
+            </div>
+         </Widget>
+
+         {/* Recent Customers */}
+         <Widget className="col-span-2 flex flex-col overflow-hidden">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-base font-bold text-slate-800">Recent Customers</h3>
+              <button className="flex items-center gap-1 text-sm font-bold text-primary hover:text-blue-700">
+                 View All &rarr;
+              </button>
             </div>
             <div className="overflow-x-auto w-full">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="text-[10px] font-black uppercase text-slate-400 border-b border-slate-100">
-                    <th className="pb-4 px-4">TXN ID</th>
-                    <th className="pb-4 px-4">Bundle</th>
-                    <th className="pb-4 px-4">Customer</th>
-                    <th className="pb-4 px-4">Date</th>
-                    <th className="pb-4 px-4 text-right">Amount</th>
-                    <th className="pb-4 px-4 text-right">Commission (60%)</th>
-                    <th className="pb-4 px-4 text-center">Status</th>
+                  <tr className="text-xs font-bold text-slate-500 border-b border-slate-100">
+                    <th className="pb-3 px-2">Product</th>
+                    <th className="pb-3 px-2">Orders ID</th>
+                    <th className="pb-3 px-2">Customer Name</th>
+                    <th className="pb-3 px-2">Date</th>
+                    <th className="pb-3 px-2">Price</th>
+                    <th className="pb-3 px-2">Statues</th>
                   </tr>
                 </thead>
-                <tbody className="text-xs font-bold text-slate-700">
+                <tbody className="text-sm font-semibold text-slate-700">
                   {[
-                    { id: '#EM-P952', bundle: 'Web Dev Masterclass', name: 'Ayush K.', date: '26 Mar, 10:45', amount: '₹4,999', comm: '₹2,999', status: 'PAID' },
-                    { id: '#EM-P951', bundle: 'AI & ML Bundle', name: 'Sneha R.', date: '25 Mar, 18:20', amount: '₹5,999', comm: '₹3,599', status: 'PAID' },
-                    { id: '#EM-P950', bundle: 'Interview Prep', name: 'Tanmay S.', date: '25 Mar, 14:12', amount: '₹2,999', comm: '₹1,799', status: 'PAID' },
-                    { id: '#EM-P949', bundle: 'Web Dev Masterclass', name: 'Priya M.', date: '24 Mar, 09:30', amount: '₹4,999', comm: '₹2,999', status: 'PAID' },
-                    { id: '#EM-P948', bundle: 'AI & ML Bundle', name: 'Rahul V.', date: '23 Mar, 22:15', amount: '₹5,999', comm: '₹3,599', status: 'PAID' }
+                    { id: '#202395', name: 'Ripon Ahmed', date: '1 Jan 24', price: '$20,584', status: 'Complete', statColor: 'text-green-600 bg-green-100' },
+                    { id: '#202396', name: 'Leslie Alexander', date: '2 Jan 24', price: '$11,234', status: 'Pending', statColor: 'text-orange-600 bg-orange-100' },
+                    { id: '#202397', name: 'Ralph Edwards', date: '3 Jan 24', price: '$11,159', status: 'Complete', statColor: 'text-green-600 bg-green-100' },
+                    { id: '#202398', name: 'Ronaid Richards', date: '4 Jan 24', price: '$10,483', status: 'Complete', statColor: 'text-green-600 bg-green-100' },
+                    { id: '#202399', name: 'Devon Lane', date: '6 Jan 24', price: '$9,084', status: 'Pending', statColor: 'text-orange-600 bg-orange-100' }
                   ].map((row, i) => (
-                    <tr key={i} className="hover:bg-blue-50/50 transition-colors border-b border-slate-50 last:border-0">
-                      <td className="py-5 px-4 font-mono text-[10px] opacity-40">{row.id}</td>
-                      <td className="py-5 px-4 font-black uppercase text-[10px] tracking-tighter">{row.bundle}</td>
-                      <td className="py-5 px-4">{row.name}</td>
-                      <td className="py-5 px-4 text-slate-400">{row.date}</td>
-                      <td className="py-5 px-4 text-right">₹{row.amount.replace('₹','')}</td>
-                      <td className="py-5 px-4 text-right font-black text-blue-600">₹{row.comm.replace('₹','')}</td>
-                      <td className="py-5 px-4 text-center">
-                        <span className="px-3 py-1 rounded-full text-[8px] font-black bg-green-500/10 text-green-600 tracking-widest">COMPLETE</span>
+                    <tr key={i} className="hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0">
+                      <td className="py-3 px-2">
+                        <div className="w-8 h-8 rounded bg-slate-200 overflow-hidden shadow-sm">
+                           <img src={`https://source.unsplash.com/random/100x100?product&sig=${i}`} alt="product" className="w-full h-full object-cover" />
+                        </div>
+                      </td>
+                      <td className="py-3 px-2 text-slate-500">{row.id}</td>
+                      <td className="py-3 px-2">{row.name}</td>
+                      <td className="py-3 px-2 flex items-center gap-1 text-slate-500"><div className="w-3 h-3 border rounded-sm"></div> {row.date}</td>
+                      <td className="py-3 px-2">{row.price}</td>
+                      <td className="py-3 px-2">
+                        <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${row.statColor}`}>{row.status}</span>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+            <div className="flex justify-between items-center mt-6 text-xs font-bold text-slate-500">
+               <div>Show <span className="bg-slate-100 px-2 py-1 rounded border">5</span> from 12</div>
+               <div className="flex items-center gap-2">
+                 <button className="w-6 h-6 flex items-center justify-center hover:bg-slate-100 rounded">&lt;</button>
+                 <button className="w-6 h-6 flex items-center justify-center bg-primary text-white rounded shadow-sm hover:opacity-90">2</button>
+                 <button className="w-6 h-6 flex items-center justify-center hover:bg-slate-100 rounded">3</button>
+                 <span>...</span>
+                 <button className="w-6 h-6 flex items-center justify-center hover:bg-slate-100 rounded">12</button>
+                 <button className="w-6 h-6 flex items-center justify-center hover:bg-slate-100 rounded">&gt;</button>
+               </div>
+            </div>
          </Widget>
       </div>
     </div>
   );
 }
-
