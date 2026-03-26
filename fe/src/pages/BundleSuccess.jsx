@@ -1,54 +1,90 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle, Download, ExternalLink, ArrowLeft } from 'lucide-react';
+import { CheckCircle, ExternalLink, ArrowLeft, Copy, Check } from 'lucide-react';
 import { bundleAPI } from '../api/client';
 
 export default function BundleSuccess() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [bundleItems, setBundleItems] = useState(null);
+
+  const [bundleData, setBundleData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [copiedIndex, setCopiedIndex] = useState(null);
 
   useEffect(() => {
-    const fetchItems = async () => {
+    const fetchBundleItems = async () => {
       try {
         setLoading(true);
         const data = await bundleAPI.getBundleItems(id);
-        setBundleItems(data);
+        setBundleData(data);
       } catch (err) {
         setError(err.message);
+
+        // fallback from localStorage
+        try {
+          const purchases = JSON.parse(localStorage.getItem('purchasedBundles') || '[]');
+          const purchase = purchases.find(p => p.bundleId === id);
+
+          if (purchase) {
+            const { mockBundles } = await import('../api/mockData');
+            const bundle = mockBundles.find(b => b._id === id);
+
+            if (bundle) {
+              setBundleData({
+                bundleTitle: bundle.title,
+                items: bundle.items,
+                purchaseDate: purchase.purchaseDate
+              });
+              setError(null);
+            }
+          }
+        } catch (e) {
+          console.error('Local fallback error:', e);
+        }
       } finally {
         setLoading(false);
       }
     };
-    fetchItems();
+
+    fetchBundleItems();
   }, [id]);
 
-  const handleDownload = async (item) => {
-    // Open the resource link in a new tab
-    window.open(item.url, '_blank');
+  const handleCopyLink = (url, index) => {
+    navigator.clipboard.writeText(url);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
   };
 
+  const handleOpenResource = (url) => {
+    window.open(url, '_blank');
+  };
+
+  // 🔄 Loading UI
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin text-blue-500">
-          <CheckCircle size={40} />
-        </div>
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <CheckCircle size={40} className="text-blue-500" />
+        </motion.div>
       </div>
     );
   }
 
-  if (error) {
+  // ❌ Error UI
+  if (error || !bundleData) {
     return (
       <div className="text-center space-y-4">
-        <p className="text-red-500 text-lg font-bold">{error}</p>
+        <p className="text-red-500 text-lg font-bold">
+          {error || 'Bundle not found'}
+        </p>
         <button
           onClick={() => navigate('/bundles')}
-          className="text-blue-500 hover:text-blue-600"
+          className="text-blue-500 hover:text-blue-600 font-bold"
         >
           Back to Bundles
         </button>
@@ -58,6 +94,15 @@ export default function BundleSuccess() {
 
   return (
     <div className="space-y-8">
+
+      {/* Back Button */}
+      <motion.button
+        onClick={() => navigate('/bundles')}
+        className="flex items-center gap-2 text-blue-500 hover:text-blue-600 text-sm font-bold"
+      >
+        <ArrowLeft size={16} /> Back to Bundles
+      </motion.button>
+
       {/* Success Header */}
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
@@ -71,84 +116,97 @@ export default function BundleSuccess() {
         >
           <CheckCircle className="text-green-500" size={64} />
         </motion.div>
-        <h1 className="text-4xl font-black uppercase tracking-tight">🎉 Payment Successful!</h1>
-        <p className="text-lg opacity-70">Your bundle is ready to download. Click on any resource to access it.</p>
+
+        <h1 className="text-4xl font-black uppercase tracking-tight">
+          🎉 Payment Successful!
+        </h1>
+
+        <p className="text-lg opacity-70">
+          Your bundle is ready. Click any resource below to access it.
+        </p>
       </motion.div>
 
       {/* Bundle Info */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
         className="glass-pod p-8 rounded-3xl space-y-4"
       >
-        <h2 className="text-3xl font-black uppercase">{bundleItems?.bundleTitle}</h2>
-        <p className="text-sm opacity-60">
-          Purchased on: {new Date(bundleItems?.purchaseDate).toLocaleDateString()}
-        </p>
+        <h2 className="text-3xl font-black uppercase">
+          {bundleData.bundleTitle}
+        </h2>
+
+        <div className="flex gap-4 text-sm opacity-60">
+          <span>✓ Purchased on {new Date(bundleData.purchaseDate).toLocaleDateString()}</span>
+          <span>✓ Lifetime access</span>
+          <span>✓ No expiry</span>
+        </div>
       </motion.div>
 
-      {/* Resources List */}
+      {/* Resources */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
         className="glass-pod p-8 rounded-3xl space-y-4"
       >
-        <h3 className="text-2xl font-black uppercase mb-6">📚 Your Resources</h3>
+        <h3 className="text-2xl font-black uppercase mb-6">
+          📚 Resources ({bundleData.items.length})
+        </h3>
+
         <div className="space-y-3">
-          {bundleItems?.items.map((item, index) => (
+          {bundleData.items.map((item, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 + index * 0.05 }}
-              className="flex items-center justify-between p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors"
+              className="flex items-start gap-4 p-5 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition group"
             >
               <div className="flex-1">
-                <p className="font-bold text-base">{item.name}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">
-                    {item.type}
-                  </span>
-                  <p className="text-xs opacity-60">{item.description}</p>
-                </div>
+                <p className="font-bold">{item.name}</p>
+                <p className="text-sm opacity-60 mt-1">{item.description}</p>
               </div>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => handleDownload(item)}
-                className="ml-4 p-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors flex items-center gap-2 text-sm font-bold text-white"
-              >
-                <Download size={16} /> Access
-              </motion.button>
+
+              <div className="flex gap-2">
+                {/* Copy */}
+                <button
+                  onClick={() => handleCopyLink(item.url, index)}
+                  className="p-2 hover:bg-white/10 rounded-lg"
+                >
+                  {copiedIndex === index ? (
+                    <Check size={16} className="text-green-500" />
+                  ) : (
+                    <Copy size={16} />
+                  )}
+                </button>
+
+                {/* Open */}
+                <button
+                  onClick={() => handleOpenResource(item.url)}
+                  className="p-2 text-blue-400 hover:bg-blue-500/20 rounded-lg"
+                >
+                  <ExternalLink size={16} />
+                </button>
+              </div>
             </motion.div>
           ))}
         </div>
       </motion.div>
 
-      {/* Action Buttons */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="flex gap-4 justify-center"
-      >
-        <motion.button
-          whileHover={{ scale: 1.05 }}
+      {/* Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700"
+        >
+          Go to Dashboard
+        </button>
+
+        <button
           onClick={() => navigate('/bundles')}
-          className="px-8 py-3 bg-white/10 border border-white/20 rounded-2xl font-bold uppercase tracking-widest hover:bg-white/20 transition-all flex items-center gap-2"
+          className="py-4 bg-white/10 rounded-2xl font-bold hover:bg-white/20"
         >
-          <ArrowLeft size={16} /> View More Bundles
-        </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          onClick={() => navigate('/')}
-          className="px-8 py-3 bg-blue-600 text-white rounded-2xl font-bold uppercase tracking-widest hover:bg-blue-700 transition-all"
-        >
-          Back to Home
-        </motion.button>
-      </motion.div>
+          Browse More Bundles
+        </button>
+      </div>
+
     </div>
   );
 }
