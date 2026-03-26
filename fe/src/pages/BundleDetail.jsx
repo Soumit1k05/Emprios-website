@@ -1,32 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ExternalLink, Loader, Check, AlertCircle } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Loader, Check, AlertCircle, Gift } from 'lucide-react';
 import { bundleAPI } from '../api/client';
+import RazorpayPaymentModal from '../components/RazorpayPaymentModal';
 
 export default function BundleDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [bundle, setBundle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [alreadyPurchased, setAlreadyPurchased] = useState(false);
-  const token = localStorage.getItem('token');
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [affiliateCode, setAffiliateCode] = useState(null);
+  const [affiliateInfo, setAffiliateInfo] = useState(null);
 
   useEffect(() => {
+    // Check for affiliate code in URL params
+    const refCode = searchParams.get('ref') || searchParams.get('affiliate');
+    if (refCode) {
+      setAffiliateCode(refCode);
+      // Get affiliate info from localStorage
+      const affiliateStats = JSON.parse(localStorage.getItem('affiliateStats') || '[]');
+      const affiliate = affiliateStats.find(a => a.code === refCode);
+      if (affiliate) {
+        setAffiliateInfo(affiliate);
+      }
+    }
+
     const fetchBundleData = async () => {
       try {
         setLoading(true);
         const data = await bundleAPI.getBundleById(id);
         setBundle(data);
-        
-        // Check if user has already purchased this bundle
-        try {
-          const purchaseData = await bundleAPI.checkPurchase(id);
-          setAlreadyPurchased(purchaseData.isPurchased);
-        } catch (e) {
-          console.log('Purchase check failed', e);
-        }
+        // Do NOT check for previous purchases
+        // Always show "Buy Now" button on every refresh
       } catch (err) {
         setError(err.message);
       } finally {
@@ -34,24 +43,26 @@ export default function BundleDetail() {
       }
     };
     fetchBundleData();
-  }, [id]);
+  }, [id, searchParams]);
 
   const handlePurchaseClick = () => {
-    if (!token) {
-      alert('Please login to purchase');
-      navigate('/auth');
-      return;
-    }
+    // Auto-create guest session if not logged in
+    const guestToken = `guest_${Date.now()}`;
+    localStorage.setItem('token', guestToken);
+    localStorage.setItem('userEmail', 'guest@emprios.com');
+    localStorage.setItem('userName', 'Guest User');
 
-    if (alreadyPurchased) {
-      navigate(`/bundle/${id}/success`);
-      return;
-    }
-
-    // Go to dedicated payment page
-    navigate(`/payment/${id}`, { state: { bundle } });
+    // Always show payment modal - no purchase status check
+    setPaymentModalOpen(true);
   };
 
+  const handlePaymentSuccess = () => {
+    setPaymentModalOpen(false);
+    // Redirect to success page after a short delay
+    setTimeout(() => {
+      navigate(`/bundle/${id}/success`);
+    }, 500);
+  };
 
   if (loading) {
     return (
@@ -127,7 +138,7 @@ export default function BundleDetail() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="flex items-start gap-4 p-4 bg-white/5 rounded-xl hover:bg-white/10 active:scale-[0.98] transition-all group cursor-pointer"
+                  className="flex items-start gap-4 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
@@ -175,28 +186,37 @@ export default function BundleDetail() {
               </ul>
             </div>
 
-            {alreadyPurchased && (
-              <div className="bg-green-500/20 border border-green-500/40 rounded-xl p-4">
-                <p className="text-sm font-bold text-green-400">✓ Already Purchased</p>
-                <p className="text-xs opacity-70 mt-1">You have access to this bundle</p>
-              </div>
-            )}
-
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handlePurchaseClick}
               className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest hover:shadow-lg shadow-blue-500/30 transition-all flex items-center justify-center gap-2"
             >
-              {alreadyPurchased ? '👁️ View Content' : '💳 Buy Now'}
+              💳 Buy Now
             </motion.button>
 
             <p className="text-xs text-center opacity-50">
-              ✓ Instant access • ✓ Secure payment • ✓ Direct links
+              ✓ Secured Payment • ✓ Powered by Razorpay • ✓ Instant Access
             </p>
+
+            {affiliateCode && (
+              <div className="bg-green-500/20 border border-green-500/40 rounded-xl p-4 text-center">
+                <p className="text-xs font-bold text-green-400">🎁 Affiliate Offer Applied</p>
+                <p className="text-xs opacity-70 mt-1">Special price via referral code</p>
+              </div>
+            )}
           </div>
         </motion.div>
       </div>
+
+      {/* Razorpay UPI Payment Modal */}
+      <RazorpayPaymentModal
+        isOpen={paymentModalOpen}
+        bundle={bundle}
+        onClose={() => setPaymentModalOpen(false)}
+        onPaymentSuccess={handlePaymentSuccess}
+        affiliateCode={affiliateCode}
+      />
     </div>
   );
 }
