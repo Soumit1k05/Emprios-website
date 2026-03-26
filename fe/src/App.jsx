@@ -9,6 +9,12 @@ import BundleList from './pages/BundleList';
 import BundleDetail from './pages/BundleDetail';
 import BundleSuccess from './pages/BundleSuccess';
 import PaymentPage from './pages/PaymentPage';
+import Dashboard from './pages/Dashboard';
+import AccountPage from './pages/AccountPage';
+import AffiliatePage from './pages/Affiliate.jsx';
+import AuthPage from './components/RegistrationPage';
+import { useAuth } from './context/AuthContext';
+import Logo from './assets/Empiros_Logo.jpeg';
 import './App.css';
 
 const NavItem = ({ children, active, onClick }) => (
