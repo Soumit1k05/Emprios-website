@@ -128,15 +128,18 @@ export default function AffiliatePage() {
         animate={{ opacity: 1, scale: 1 }}
         className="max-w-2xl mx-auto text-center space-y-8 py-12"
       >
-        <div className="glass-pod p-12 lg:p-16 space-y-8">
+        <div className="glass-pod p-12 lg:p-16 space-y-8 bg-gradient-to-b from-blue-500/5 to-transparent">
           <div className="relative inline-block">
-            <img src={Logo} alt="Logo" className="w-24 h-24 rounded-3xl shadow-2xl mx-auto mb-6" />
-            <motion.div 
-              animate={{ rotate: 360 }}
-              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 border-2 border-dashed border-blue-500/30 rounded-[2.5rem] -m-4"
-            />
+             <div className="p-1 bg-white/5 rounded-3xl border border-white/10 relative z-10">
+                <img src={Logo} alt="Logo" className="w-24 h-24 rounded-2xl shadow-2xl mx-auto" />
+             </div>
+             <motion.div 
+               animate={{ rotate: 360, scale: [1, 1.1, 1] }}
+               transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+               className="absolute inset-0 border-[3px] border-dashed border-blue-500/10 rounded-[2.5rem] -m-6"
+             />
           </div>
+
           
           <div className="space-y-4">
             <h2 className="text-4xl font-black tracking-tighter uppercase">Become an Affiliate</h2>

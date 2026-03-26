@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingCart, Loader } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { bundleAPI } from '../api/client';
 
 export default function BundleList() {
   const [bundles, setBundle] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchBundles = async () => {
@@ -50,16 +52,19 @@ export default function BundleList() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             className="glass-pod p-8 rounded-3xl flex flex-col gap-6 hover:shadow-2xl transition-shadow group cursor-pointer"
-            onClick={() => window.location.href = `/bundle/${bundle._id}`}
+            onClick={() => navigate(`/bundle/${bundle._id}`)}
           >
             <div className="w-full h-40 rounded-xl overflow-hidden bg-gradient-to-br from-blue-500/20 to-purple-500/20 group-hover:scale-105 transition-transform flex items-center justify-center">
               <img
                 src={bundle.image}
                 alt={bundle.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 onError={(e) => {
                   e.target.style.display = 'none';
-                  e.target.parentElement.innerHTML = '<div class="w-full h-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center"><span class="text-xs opacity-50">Image unavailable</span></div>';
+                  const placeholder = document.createElement('div');
+                  placeholder.className = 'w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-purple-500/20';
+                  placeholder.innerHTML = '<span class="text-[10px] font-black uppercase tracking-widest opacity-40">Digital Node</span>';
+                  e.target.parentElement.appendChild(placeholder);
                 }}
               />
             </div>
@@ -77,7 +82,10 @@ export default function BundleList() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => window.location.href = `/bundle/${bundle._id}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/bundle/${bundle._id}`);
+              }}
               className="w-full py-3 bg-blue-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 group-hover:shadow-lg"
             >
               <ShoppingCart size={14} /> View & Purchase
@@ -90,7 +98,7 @@ export default function BundleList() {
         <div className="text-center py-12">
           <p className="text-opacity-70 mb-4">No bundles available yet</p>
           <button
-            onClick={() => window.location.href = '/'}
+            onClick={() => navigate('/')}
             className="text-blue-500 hover:text-blue-600 font-bold"
           >
             Back to Home

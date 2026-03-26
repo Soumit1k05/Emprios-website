@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ExternalLink, Loader, Check, AlertCircle } from 'lucide-react';
 import { bundleAPI } from '../api/client';
-import DummyPaymentModal from '../components/DummyPaymentModal';
 
 export default function BundleDetail() {
   const { id } = useParams();
@@ -12,7 +11,6 @@ export default function BundleDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [alreadyPurchased, setAlreadyPurchased] = useState(false);
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const token = localStorage.getItem('token');
 
   useEffect(() => {
@@ -23,8 +21,12 @@ export default function BundleDetail() {
         setBundle(data);
         
         // Check if user has already purchased this bundle
-        const purchaseData = await bundleAPI.checkPurchase(id);
-        setAlreadyPurchased(purchaseData.isPurchased);
+        try {
+          const purchaseData = await bundleAPI.checkPurchase(id);
+          setAlreadyPurchased(purchaseData.isPurchased);
+        } catch (e) {
+          console.log('Purchase check failed', e);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -37,7 +39,7 @@ export default function BundleDetail() {
   const handlePurchaseClick = () => {
     if (!token) {
       alert('Please login to purchase');
-      navigate('/login');
+      navigate('/auth');
       return;
     }
 
@@ -46,17 +48,10 @@ export default function BundleDetail() {
       return;
     }
 
-    setPaymentModalOpen(true);
+    // Go to dedicated payment page
+    navigate(`/payment/${id}`, { state: { bundle } });
   };
 
-  const handlePaymentSuccess = () => {
-    setPaymentModalOpen(false);
-    setAlreadyPurchased(true);
-    // Redirect to success page after a short delay
-    setTimeout(() => {
-      navigate(`/bundle/${id}/success`);
-    }, 500);
-  };
 
   if (loading) {
     return (
@@ -132,7 +127,7 @@ export default function BundleDetail() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="flex items-start gap-4 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer"
+                  className="flex items-start gap-4 p-4 bg-white/5 rounded-xl hover:bg-white/10 active:scale-[0.98] transition-all group cursor-pointer"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
@@ -197,19 +192,11 @@ export default function BundleDetail() {
             </motion.button>
 
             <p className="text-xs text-center opacity-50">
-              ✓ Instant access • ✓ Test mode • ✓ No real charges
+              ✓ Instant access • ✓ Secure payment • ✓ Direct links
             </p>
           </div>
         </motion.div>
       </div>
-
-      {/* Dummy Payment Modal */}
-      <DummyPaymentModal
-        isOpen={paymentModalOpen}
-        bundle={bundle}
-        onClose={() => setPaymentModalOpen(false)}
-        onPaymentSuccess={handlePaymentSuccess}
-      />
     </div>
   );
 }

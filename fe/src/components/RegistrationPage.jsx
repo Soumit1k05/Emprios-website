@@ -87,9 +87,12 @@ export default function AuthPage({ onSuccess }) {
     >
       <div className="glass-pod p-10">
         {/* Header */}
+        {/* Header */}
         <div className="text-center mb-8">
-          <img src={Logo} alt="Empiros Logo" className="w-20 h-20 rounded-2xl mx-auto mb-4 shadow-xl shadow-blue-500/20" />
-          <h2 className="text-2xl font-black uppercase tracking-tighter">
+          <div className="flex justify-center mb-6">
+             <img src={Logo} alt="Empiros Logo" className="h-20 w-auto object-contain" />
+          </div>
+          <h2 className="text-3xl font-black uppercase tracking-tighter bg-gradient-to-b from-inherit to-inherit/50 bg-clip-text">
             {tab === 'register' ? 'Create Account' : 'Welcome Back'}
           </h2>
           <p className="text-[10px] font-bold opacity-40 mt-1.5 uppercase tracking-widest">

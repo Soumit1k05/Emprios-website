@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
+import { 
   Sun, Moon, Twitter, Facebook, Instagram, Youtube,
   ArrowLeft, Check, User
 } from 'lucide-react';
@@ -15,10 +15,10 @@ import AffiliatePage from './pages/Affiliate.jsx';
 import AuthPage from './components/RegistrationPage';
 import { useAuth } from './context/AuthContext';
 import Logo from './assets/Empiros_Logo.jpeg';
-import './App.css';
+
 
 const NavItem = ({ children, active, onClick }) => (
-  <button
+  <button 
     onClick={onClick}
     className={`text-[10px] font-black uppercase tracking-[0.2em] transition-all ${active ? 'text-blue-500 opacity-100' : 'text-inherit opacity-60 hover:opacity-100'}`}
   >
@@ -27,7 +27,7 @@ const NavItem = ({ children, active, onClick }) => (
 );
 
 const FeatureCard = ({ icon, title, desc, delay = 0 }) => (
-  <motion.div
+  <motion.div 
     initial={{ opacity: 0, scale: 0.9 }}
     animate={{ opacity: 1, scale: 1 }}
     transition={{ duration: 0.4, delay: delay * 0.05 }}
@@ -73,9 +73,16 @@ function AppContent() {
               <ArrowLeft size={20} />
             </button>
             <div className="flex items-center gap-4 cursor-pointer group" onClick={() => navigate('/')}>
-              <img src={Logo} alt="Empiros Logo" className="w-10 h-10 rounded-xl shadow-lg border border-white/10 group-hover:scale-110 transition-transform" />
-              <span className="hidden sm:block text-xs font-black uppercase tracking-[0.4em] opacity-80 group-hover:opacity-100 transition-opacity">EMPIROS</span>
+               <div className="relative">
+                  <img src={Logo} alt="Empiros Logo" className="w-11 h-11 object-cover rounded-[14px] shadow-2xl group-hover:scale-105 transition-all duration-500 relative z-10" />
+                  <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full scale-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+               </div>
+               <div className="flex flex-col -gap-1">
+                  <span className="hidden sm:block text-[13px] font-black uppercase tracking-[0.3em] text-inherit group-hover:text-blue-500 transition-colors">EMPIROS</span>
+                  <span className="hidden sm:block text-[7px] font-black uppercase tracking-[0.5em] opacity-40 group-hover:opacity-60 transition-all">Digital Ecosystem</span>
+               </div>
             </div>
+
           </div>
 
           <nav className="hidden md:flex items-center gap-10">
@@ -92,9 +99,9 @@ function AppContent() {
 
           <div className="flex items-center gap-4">
             <div className="w-12 h-6 rounded-full bg-white/10 border border-white/20 p-1 flex items-center cursor-pointer relative" onClick={() => setIsDark(!isDark)}>
-              <motion.div animate={{ x: isDark ? 24 : 0 }} className="absolute w-4 h-4 bg-white rounded-full shadow-md flex items-center justify-center">
-                {isDark ? <Moon size={8} className="text-indigo-900" /> : <Sun size={8} className="text-amber-500" />}
-              </motion.div>
+               <motion.div animate={{ x: isDark ? 24 : 0 }} className="absolute w-4 h-4 bg-white rounded-full shadow-md flex items-center justify-center">
+                 {isDark ? <Moon size={8} className="text-indigo-900" /> : <Sun size={8} className="text-amber-500" />}
+               </motion.div>
             </div>
             {user && (
               <button onClick={() => navigate('/account')} className="w-10 h-10 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 hover:bg-blue-600/30 transition-all">
@@ -128,46 +135,15 @@ function AppContent() {
                 </motion.div>
               } />
 
-              <Route path="/bundles" element={
-                <motion.div key="bundles" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}>
-                  <BundleList />
-                </motion.div>
-              } />
-
-              <Route path="/bundle/:id" element={
-                <motion.div key="bundle-detail" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <BundleDetail />
-                </motion.div>
-              } />
-
-              <Route path="/bundle/:id/success" element={
-                <motion.div key="bundle-success" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <BundleSuccess />
-                </motion.div>
-              } />
-
-              <Route path="/payment/:id" element={
-                <motion.div key="payment" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <PaymentPage />
-                </motion.div>
-              } />
-
-
-              <Route path="/dashboard" element={
-                <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">
-                  <div className="glass-pod p-10 h-[500px] flex items-center justify-center relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 group-hover:opacity-100 transition-opacity" />
-                    <div className="text-center space-y-4 relative z-10">
-                      <div className="w-20 h-20 rounded-3xl bg-blue-600/10 flex items-center justify-center mx-auto mb-6">
-                        <Zap className="text-blue-500" size={40} />
-                      </div>
-                      <h3 className="text-2xl font-black uppercase italic">Prototype Mode Active.</h3>
-                      <p className="text-[11px] font-bold opacity-50 max-w-xs mx-auto">This represents the live scaling environment of Empiros. All nodes are ready for deployment.</p>
-                      <button onClick={() => navigate('/')} className="text-[10px] font-black uppercase tracking-widest text-blue-500 border-b-2 border-blue-500 pb-1">Exit Prototype</button>
-                    </div>
-                  </div>
-                </motion.div>
-              } />
+              <Route path="/auth" element={user ? <Navigate to="/account" /> : <AuthPage onSuccess={() => navigate('/account')} />} />
+              <Route path="/bundles" element={<BundleList />} />
+              <Route path="/bundle/:id" element={<BundleDetail />} />
+              <Route path="/bundle/:id/success" element={<BundleSuccess />} />
+              <Route path="/payment/:id" element={<PaymentPage />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/account" element={user ? <AccountPage onLogout={() => navigate('/')} /> : <Navigate to="/auth" />} />
+              <Route path="/affiliate" element={user ? <AffiliatePage /> : <Navigate to="/auth" />} />
+              <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </AnimatePresence>
         </main>
@@ -180,8 +156,8 @@ function AppContent() {
           </div>
           <p className="text-[8px] font-black uppercase tracking-[0.3em] opacity-20">© 2026 EMPIROS PLATFORM</p>
           <div className="flex gap-5 opacity-40 scale-90">
-            <Twitter size={16} className="hover:text-blue-400 cursor-pointer transition-colors" />
-            <Instagram size={16} className="hover:text-pink-400 cursor-pointer transition-colors" />
+            <Twitter size={16} className="hover:text-blue-400 cursor-pointer transition-colors" /> 
+            <Instagram size={16} className="hover:text-pink-400 cursor-pointer transition-colors" /> 
             <Youtube size={16} className="hover:text-red-500 cursor-pointer transition-colors" />
           </div>
         </footer>
