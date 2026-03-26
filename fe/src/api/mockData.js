@@ -124,22 +124,30 @@ export const mockBundles = [
 
 // Mock purchases storage
 let mockPurchases = [];
+let mockAffiliateSales = []; // Stores sales credited to affiliates
 
 export const mockBundleAPI = {
   getAllBundles: async () => {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 500));
-    return mockBundles;
+    // Add 60% commission info to each bundle for frontend display
+    return mockBundles.map(b => ({
+      ...b,
+      commission: Math.round(b.price * 0.6)
+    }));
   },
 
   getBundleById: async (id) => {
     await new Promise(resolve => setTimeout(resolve, 300));
     const bundle = mockBundles.find(b => b._id === id);
     if (!bundle) throw new Error('Bundle not found');
-    return bundle;
+    return {
+      ...bundle,
+      commission: Math.round(bundle.price * 0.6)
+    };
   },
 
-  initiatePurchase: async (bundleId) => {
+  initiatePurchase: async (bundleId, affiliateId = null) => {
     await new Promise(resolve => setTimeout(resolve, 400));
     const bundle = mockBundles.find(b => b._id === bundleId);
     if (!bundle) throw new Error('Bundle not found');
@@ -149,7 +157,9 @@ export const mockBundleAPI = {
       user: 'mock_user',
       bundle: bundleId,
       amount: bundle.price,
-      status: 'pending'
+      status: 'pending',
+      affiliateId: affiliateId,
+      commission: affiliateId ? Math.round(bundle.price * 0.6) : 0
     };
     
     mockPurchases.push(purchase);
@@ -163,6 +173,7 @@ export const mockBundleAPI = {
       }
     };
   },
+
 
   handlePaymentSuccess: async (purchaseId, paymentId) => {
     await new Promise(resolve => setTimeout(resolve, 300));

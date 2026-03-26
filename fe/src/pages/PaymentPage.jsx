@@ -10,10 +10,24 @@ export default function PaymentPage() {
   const navigate = useNavigate();
   const bundle = location.state?.bundle;
   
+  // Extract referral ID from URL
+  const searchParams = new URLSearchParams(location.search);
+  const referralId = searchParams.get('ref') || localStorage.getItem('affiliate_ref');
+
+  // Store referral in local storage if present
+  useEffect(() => {
+    if (searchParams.get('ref')) {
+      localStorage.setItem('affiliate_ref', searchParams.get('ref'));
+    }
+  }, [searchParams]);
+
   const [method, setMethod] = useState('upi');
   const [upiId, setUpiId] = useState('');
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState('selection'); // selection, processing
+  
+  // Calculate potential affiliate commission (60%)
+  const commission = Math.round((bundle?.price || 0) * 0.6);
 
   if (!bundle) {
     return (
@@ -34,26 +48,30 @@ export default function PaymentPage() {
     setLoading(true);
 
     try {
-      // Create a dummy purchase record if not logged in (mock)
-      const purchaseId = 'MOCK_PURCHASE_' + Date.now();
+      // Create a dummy purchase record on the server (mocked)
+      // We pass the referralId to trigger the commission logic
+      const result = await bundleAPI.initiatePurchase(id, referralId);
       
-      // We simulate the transaction delay
+      // Simulate real transaction delay + verification
       setTimeout(async () => {
         try {
-          // In a real app, this would be handled via Razorpay SDK and then calling handlePaymentSuccess
-          navigate(`/bundle/${id}/success`, { state: { bundle, paymentId: 'PAYID_' + Math.random().toString(36).substr(2, 9).toUpperCase() } });
+          await bundleAPI.handlePaymentSuccess(result.purchase._id, 'UPI_TXN_' + Math.random().toString(36).substr(2, 9).toUpperCase());
+          navigate(`/bundle/${id}/success`, { state: { bundle, referralId } });
         } catch (err) {
-          alert('Payment processing failed. Please try again.');
+          alert('Verification failed. Re-initiating...');
           setStep('selection');
           setLoading(false);
         }
-      }, 3000);
+      }, 4000);
     } catch (err) {
-      alert('Payment failed: ' + err.message);
+      alert('Network Error: ' + err.message);
       setStep('selection');
       setLoading(false);
     }
   };
+
+  // Mocking QR Code Display for UPI
+  const [showQR, setShowQR] = useState(false);
 
   return (
     <div className="max-w-4xl mx-auto w-full">
@@ -135,19 +153,42 @@ export default function PaymentPage() {
                     <motion.div 
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
-                      className="space-y-4"
+                      className="space-y-6"
                     >
-                      <h3 className="text-xs font-black uppercase tracking-widest opacity-60">Enter UPI Details</h3>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold opacity-50 uppercase ml-1">UPI ID (e.g. user@okaxis)</label>
-                        <input 
-                          type="text" 
-                          placeholder="yourname@upi"
-                          value={upiId}
-                          onChange={(e) => setUpiId(e.target.value)}
-                          className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 font-bold outline-none focus:border-blue-500 transition-all"
-                        />
+                      <div className="flex bg-white/5 p-1 rounded-xl">
+                        <button 
+                          onClick={() => setShowQR(false)}
+                          className={`flex-1 py-3 text-[10px] font-black uppercase rounded-lg transition-all ${!showQR ? 'bg-blue-600 text-white' : 'hover:bg-white/5'}`}
+                        >
+                          UPI ID
+                        </button>
+                        <button 
+                          onClick={() => setShowQR(true)}
+                          className={`flex-1 py-3 text-[10px] font-black uppercase rounded-lg transition-all ${showQR ? 'bg-blue-600 text-white' : 'hover:bg-white/5'}`}
+                        >
+                          Scan QR
+                        </button>
                       </div>
+
+                      {showQR ? (
+                        <div className="flex flex-col items-center gap-4 py-4">
+                          <div className="w-48 h-48 bg-white p-4 rounded-3xl shadow-xl overflow-hidden">
+                            <img src="/upi_qr.png" alt="UPI QR Code" className="w-full h-full object-contain" />
+                          </div>
+                          <p className="text-[10px] font-bold opacity-60">Scan with GPay, PhonePe, or Any UPI App</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold opacity-50 uppercase ml-1">UPI ID (e.g. user@okaxis)</label>
+                          <input 
+                            type="text" 
+                            placeholder="yourname@upi"
+                            value={upiId}
+                            onChange={(e) => setUpiId(e.target.value)}
+                            className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 font-bold outline-none focus:border-blue-500 transition-all"
+                          />
+                        </div>
+                      )}
                     </motion.div>
                   )}
 
@@ -234,6 +275,12 @@ export default function PaymentPage() {
                   <span>Price</span>
                   <span>₹{bundle.price}</span>
                 </div>
+                {referralId && (
+                  <div className="flex justify-between text-[10px] font-black uppercase text-blue-400 py-1 border-y border-blue-500/10">
+                    <span>Affiliate Share (60%)</span>
+                    <span>₹{commission} / shared</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-xs font-bold text-green-500">
                   <span>Tax (Included)</span>
                   <span>₹0</span>
@@ -244,6 +291,7 @@ export default function PaymentPage() {
                 </div>
               </div>
             </div>
+
 
             <div className="space-y-4">
               <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl">
