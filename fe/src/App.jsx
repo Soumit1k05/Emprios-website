@@ -15,7 +15,7 @@ import AffiliatePage from './pages/Affiliate.jsx';
 import AuthPage from './components/RegistrationPage';
 import { useAuth } from './context/AuthContext';
 import Logo from './assets/Empiros_Logo.jpeg';
-import './App.css';
+
 
 const NavItem = ({ children, active, onClick }) => (
   <button 
