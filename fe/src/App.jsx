@@ -9,6 +9,7 @@ import BundleList from './pages/BundleList';
 import BundleDetail from './pages/BundleDetail';
 import BundleSuccess from './pages/BundleSuccess';
 import PaymentPage from './pages/PaymentPage';
+import Dashboard from './pages/Dashboard';
 import './App.css';
 
 
@@ -164,18 +165,8 @@ function AppContent() {
 
 
               <Route path="/dashboard" element={
-                <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">
-                  <div className="glass-pod p-10 h-[500px] flex items-center justify-center relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 group-hover:opacity-100 transition-opacity" />
-                    <div className="text-center space-y-4 relative z-10">
-                      <div className="w-20 h-20 rounded-3xl bg-blue-600/10 flex items-center justify-center mx-auto mb-6">
-                         <Zap className="text-blue-500" size={40} />
-                      </div>
-                      <h3 className="text-2xl font-black uppercase italic">Prototype Mode Active.</h3>
-                      <p className="text-[11px] font-bold opacity-50 max-w-xs mx-auto">This represents the live scaling environment of Empiros. All nodes are ready for deployment.</p>
-                      <button onClick={() => navigate('/')} className="text-[10px] font-black uppercase tracking-widest text-blue-500 border-b-2 border-blue-500 pb-1">Exit Prototype</button>
-                    </div>
-                  </div>
+                <motion.div key="dashboard" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full">
+                  <Dashboard />
                 </motion.div>
               } />
             </Routes>
