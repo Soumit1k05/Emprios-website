@@ -6,7 +6,7 @@ export const mockBundles = [
     description: 'Complete web development bundle with HTML, CSS, JavaScript, React, and Node.js tutorials',
     price: 4999,
     category: 'web-dev',
-    image: 'https://via.placeholder.com/400x300?text=Web+Development',
+    image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop',
     items: [
       {
         name: 'HTML & CSS Basics',
@@ -46,7 +46,7 @@ export const mockBundles = [
     description: 'Comprehensive AI/ML bundle with Python, TensorFlow, and practical projects',
     price: 5999,
     category: 'ai-ml',
-    image: 'https://via.placeholder.com/400x300?text=AI+ML',
+    image: 'https://images.unsplash.com/photo-1555949519-d953f7cf9710?w=400&h=300&fit=crop',
     items: [
       {
         name: 'Python for Data Science',
@@ -86,7 +86,7 @@ export const mockBundles = [
     description: 'Complete interview prep with DSA, system design, and behavioral questions',
     price: 2999,
     category: 'interview-prep',
-    image: 'https://via.placeholder.com/400x300?text=Interview+Prep',
+    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop',
     items: [
       {
         name: 'Data Structures & Algorithms',
@@ -124,30 +124,22 @@ export const mockBundles = [
 
 // Mock purchases storage
 let mockPurchases = [];
-let mockAffiliateSales = []; // Stores sales credited to affiliates
 
 export const mockBundleAPI = {
   getAllBundles: async () => {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 500));
-    // Add 60% commission info to each bundle for frontend display
-    return mockBundles.map(b => ({
-      ...b,
-      commission: Math.round(b.price * 0.6)
-    }));
+    return mockBundles;
   },
 
   getBundleById: async (id) => {
     await new Promise(resolve => setTimeout(resolve, 300));
     const bundle = mockBundles.find(b => b._id === id);
     if (!bundle) throw new Error('Bundle not found');
-    return {
-      ...bundle,
-      commission: Math.round(bundle.price * 0.6)
-    };
+    return bundle;
   },
 
-  initiatePurchase: async (bundleId, affiliateId = null) => {
+  initiatePurchase: async (bundleId) => {
     await new Promise(resolve => setTimeout(resolve, 400));
     const bundle = mockBundles.find(b => b._id === bundleId);
     if (!bundle) throw new Error('Bundle not found');
@@ -157,9 +149,7 @@ export const mockBundleAPI = {
       user: 'mock_user',
       bundle: bundleId,
       amount: bundle.price,
-      status: 'pending',
-      affiliateId: affiliateId,
-      commission: affiliateId ? Math.round(bundle.price * 0.6) : 0
+      status: 'pending'
     };
     
     mockPurchases.push(purchase);
@@ -173,7 +163,6 @@ export const mockBundleAPI = {
       }
     };
   },
-
 
   handlePaymentSuccess: async (purchaseId, paymentId) => {
     await new Promise(resolve => setTimeout(resolve, 300));
