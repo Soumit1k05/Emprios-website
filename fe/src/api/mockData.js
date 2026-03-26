@@ -46,7 +46,7 @@ export const mockBundles = [
     description: 'Comprehensive AI/ML bundle with Python, TensorFlow, and practical projects',
     price: 5999,
     category: 'ai-ml',
-    image: 'https://images.unsplash.com/photo-1555949519-d953f7cf9710?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop&q=80&blend=https://images.unsplash.com/photo-1555949519-d953f7cf9710?w=400&h=300&fit=crop&blend_mode=darken&blend=50%',
     items: [
       {
         name: 'Python for Data Science',
