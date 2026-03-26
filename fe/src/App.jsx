@@ -8,7 +8,9 @@ import {
 import BundleList from './pages/BundleList';
 import BundleDetail from './pages/BundleDetail';
 import BundleSuccess from './pages/BundleSuccess';
+import PaymentPage from './pages/PaymentPage';
 import './App.css';
+
 
 const NavItem = ({ children, active, onClick }) => (
   <button 
@@ -153,6 +155,13 @@ function AppContent() {
                   <BundleSuccess />
                 </motion.div>
               } />
+
+              <Route path="/payment/:id" element={
+                <motion.div key="payment" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <PaymentPage />
+                </motion.div>
+              } />
+
 
               <Route path="/dashboard" element={
                 <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">

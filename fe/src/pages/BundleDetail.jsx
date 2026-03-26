@@ -28,28 +28,11 @@ export default function BundleDetail() {
     fetchBundle();
   }, [id]);
 
-  const handlePurchase = async () => {
-    if (!token) {
-      alert('Please login to purchase');
-      navigate('/login');
-      return;
-    }
-
-    try {
-      setProcessing(true);
-      const result = await bundleAPI.initiatePurchase(id);
-
-      // Simulate payment success (dummy payment)
-      // In real app, integrate Razorpay here
-      setTimeout(async () => {
-        await bundleAPI.handlePaymentSuccess(result.purchase._id, 'DUMMY_PAYMENT_' + Date.now());
-        navigate(`/bundle/${id}/success`, { state: { bundle } });
-      }, 1500);
-    } catch (err) {
-      alert('Purchase failed: ' + err.message);
-      setProcessing(false);
-    }
+  const handlePurchase = () => {
+    // Navigate to payment page directly with bundle data
+    navigate(`/payment/${id}`, { state: { bundle } });
   };
+
 
   if (loading) {
     return (
