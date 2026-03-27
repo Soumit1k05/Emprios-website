@@ -9,6 +9,7 @@ import BundleList from './pages/BundleList';
 import BundleDetail from './pages/BundleDetail';
 import BundleSuccess from './pages/BundleSuccess';
 import AffiliateDashboardPage from './pages/AffiliateDashboardPage';
+import AccountPage from './pages/AccountPage';
 import RegistrationPage from './components/RegistrationPage';
 import Dashboard from './pages/Dashboard';
 import Logo from './components/Logo';
