@@ -21,7 +21,6 @@ const ActionMenu = ({ isOpen, onClose }) => {
   );
 };
 
-// --- DYNAMIC DATA MAPPING ---
 const chartDataMapping = {
   '12 MONTHS': [
     { label: 'Feb', val: 40, color: '#60a5fa' }, { label: 'Mar', val: 30, color: '#818cf8' }, 
@@ -119,14 +118,9 @@ export default function Dashboard() {
       let currentOffset = 0;
       return (
         <div className="w-full h-full flex items-center justify-center p-2">
-          {/* FIX: Increased viewBox to 50 50, cx/cy to 25. 
-            Added max-h-full to prevent the SVG from pushing out of the container boundaries. 
-          */}
-          <svg viewBox="0 0 50 50" className="max-h-full w-full max-w-[16rem] transform -rotate-90 drop-shadow-2xl overflow-visible">
-            {/* Background Track */}
+          <svg viewBox="0 0 50 50" className="h-full w-full max-w-[16rem] transform -rotate-90 drop-shadow-2xl overflow-visible">
             <circle cx="25" cy="25" r="15.9155" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
             
-            {/* Data Slices */}
             {currentChartData.map((d, i) => {
               const dashVal = (d.val / totalVal) * 100;
               const dashStr = `${dashVal} ${100 - dashVal}`;
@@ -146,7 +140,6 @@ export default function Dashboard() {
       );
     }
 
-    // Area Chart (SVG)
     return (
       <div className="w-full h-full flex items-end">
         <svg viewBox="0 0 100 40" className="w-full h-full overflow-visible preserve-3d" preserveAspectRatio="none">
@@ -154,6 +147,11 @@ export default function Dashboard() {
             <linearGradient id="dynamicGradient" x1="0" y1="0" x2="1" y2="0">
               {currentChartData.map((d, i) => (
                 <stop key={i} offset={`${(i / (currentChartData.length - 1)) * 100}%`} stopColor={d.color} stopOpacity="0.5"/>
+              ))}
+            </linearGradient>
+            <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+              {currentChartData.map((d, i) => (
+                <stop key={i} offset={`${(i / (currentChartData.length - 1)) * 100}%`} stopColor={d.color} stopOpacity="1"/>
               ))}
             </linearGradient>
             <linearGradient id="fadeGradient" x1="0" y1="0" x2="0" y2="1">
@@ -174,7 +172,7 @@ export default function Dashboard() {
           <path 
             d={generateAreaPath(currentChartData, true)} 
             fill="none" 
-            stroke={currentChartData[currentChartData.length - 1].color} 
+            stroke="url(#lineGradient)" 
             strokeWidth="0.8" 
             className="transition-all duration-700 ease-in-out drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]"
           />
@@ -256,9 +254,12 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Sales Report Chart Container */}
-        <Widget className="col-span-2 relative h-[26rem] flex flex-col">
-          <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-6">
+        
+        {/* --- FIXED SALES REPORT CONTAINER USING STRICT GRID --- */}
+        <Widget className="col-span-2 relative h-[26rem] grid grid-rows-[auto_minmax(0,1fr)_auto] gap-2">
+          
+          {/* Header Row (Row 1) */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-4">
             <div className="flex items-center gap-4">
               <h3 className="text-lg font-black uppercase">Sales Report</h3>
               <div className="hidden sm:flex bg-white/5 border border-white/10 rounded-lg p-1 gap-1">
@@ -310,15 +311,20 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* FIX: Removed overflow-hidden from here, allowing flex children to control their alignment without getting sliced */}
-          <div className="flex-1 w-full relative mt-2">
-            {renderNativeChart()}
+          {/* Chart Wrapper (Row 2) - Physically cannot push the rows above/below it */}
+          <div className="relative w-full h-full">
+            <div className="absolute inset-0">
+               {renderNativeChart()}
+            </div>
           </div>
           
-          <div className="flex justify-between text-[11px] font-bold opacity-40 mt-4 px-2 uppercase tracking-widest">
+          {/* Labels Row (Row 3) */}
+          <div className="flex justify-between text-[11px] font-bold opacity-40 mt-2 px-2 uppercase tracking-widest">
             {currentChartData.map(m => <span key={m.label}>{m.label}</span>)}
           </div>
         </Widget>
+        {/* --- END FIXED COMPONENT --- */}
+
 
         {/* Traffic Sources */}
         <Widget className="flex flex-col">
@@ -351,7 +357,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-         {/* Total Bets (Donut Chart applied same fixes) */}
+         {/* Total Bets */}
          <Widget className="flex flex-col relative">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-black uppercase">Total Bets</h3>
@@ -362,7 +368,6 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 flex flex-col items-center justify-center py-6">
                <div className="relative w-48 h-48 flex items-center justify-center mb-8 drop-shadow-2xl">
-                 {/* FIX: Adjusted viewBox here as well to match */}
                  <svg viewBox="0 0 50 50" className="w-full h-full transform -rotate-90 overflow-visible">
                     <circle cx="25" cy="25" r="15.9155" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
                     <circle cx="25" cy="25" r="15.9155" fill="none" stroke="#3b82f6" strokeWidth="8" strokeDasharray="70 30" />
