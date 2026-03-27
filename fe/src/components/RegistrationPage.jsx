@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User, ArrowRight, Loader2, Phone } from 'lucide-react';
-import logo from '../assets/Empiros_Logo.jpeg';
+import Logo from './Logo';
 import { useAuth } from '../context/AuthContext';
 
 
@@ -63,13 +63,7 @@ export default function RegistrationPage() {
         className="w-full max-w-md bg-white rounded-3xl shadow-2xl shadow-slate-200/50 p-10 border border-slate-100"
       >
         <div className="flex flex-col items-center mb-8">
-          <motion.img 
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            src={logo} 
-            alt="Empiros Logo" 
-            className="h-16 w-auto mb-4 rounded-xl"
-          />
+           <Logo size="h-12" className="mb-4" />
           <h2 className="text-3xl font-bold text-slate-800 tracking-tight">Create Account</h2>
           <p className="text-slate-500 mt-2 font-medium">Join the Empiros ecosystem today.</p>
         </div>

@@ -9,9 +9,9 @@ import BundleList from './pages/BundleList';
 import BundleDetail from './pages/BundleDetail';
 import BundleSuccess from './pages/BundleSuccess';
 import AffiliateDashboardPage from './pages/AffiliateDashboardPage';
-import AccountPage from './pages/AccountPage';
 import RegistrationPage from './components/RegistrationPage';
 import Dashboard from './pages/Dashboard';
+import Logo from './components/Logo';
 
 
 
@@ -99,9 +99,8 @@ function AppContent() {
             <button onClick={handleBack} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
               <ArrowLeft size={20} />
             </button>
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-black italic shadow-2xl">E</div>
-               <span className="text-sm font-black uppercase tracking-[0.3em] text-inherit">EMPIROS</span>
+            <div onClick={() => navigate('/')}>
+               <Logo />
             </div>
           </div>
 
@@ -140,10 +139,45 @@ function AppContent() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                    <FeatureCard icon="🌏" title="Global Reach" desc="Expand your horizons." delay={1} />
-                    <FeatureCard icon="📊" title="Deep Data" desc="Analyze every metric." delay={2} />
-                    <FeatureCard icon="⚡" title="Hyper Sync" desc="Real-time precision." delay={3} />
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <FeatureCard icon="🚀" title="Instant Start" desc="Sign up and start earning in minutes." delay={1} />
+                    <FeatureCard icon="💸" title="60% Payout" desc="Industry leading commissions." delay={2} />
+                    <FeatureCard icon="📈" title="Live Stats" desc="Track your progress in real-time." delay={3} />
+                    <FeatureCard icon="🎓" title="Free Gear" desc="Get exclusive bundle resources." delay={4} />
+                  </div>
+
+                  {/* Why Join Us Section */}
+                  <div className="mt-20 glass-pod p-8 lg:p-16 space-y-10">
+                    <div className="text-left space-y-3">
+                      <h2 className="text-3xl lg:text-4xl font-black tracking-tighter uppercase">Why Choose Empiros?</h2>
+                      <p className="text-sm opacity-50 font-bold uppercase tracking-widest">The ecosystem built for modern digital marketers.</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-500">
+                             <Check size={20} />
+                          </div>
+                          <h3 className="text-lg font-black uppercase">Automated Payouts</h3>
+                        </div>
+                        <p className="text-sm opacity-60 font-medium leading-relaxed">No more waiting for weeks. Our system processes affiliate payouts with precision and speed, ensuring you get your hard-earned money faster than anywhere else.</p>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500">
+                             <Zap size={20} />
+                          </div>
+                          <h3 className="text-lg font-black uppercase">High-Quality Bundles</h3>
+                        </div>
+                        <p className="text-sm opacity-60 font-medium leading-relaxed">Promote products you can actually stand behind. Our course bundles and digital resources are curated by industry experts to provide genuine value to your referrals.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-center py-12">
+                     <p className="text-xs font-bold opacity-30 uppercase tracking-[0.5em]">Trusted by 10,000+ Affiliates Worldwide</p>
                   </div>
                 </motion.div>
               } />

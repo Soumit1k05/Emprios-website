@@ -139,14 +139,29 @@ export default function BundleSuccess() {
         </div>
 
         <button
-          onClick={() => {
-            const link = document.createElement('a');
-            link.href = 'https://github.com/Soumit1k05/Emprios-website/archive/refs/heads/main.zip'; // Using repo zip as fallback
-            link.download = `${bundleData.bundleTitle.replace(/\s+/g, '_')}_Bundle.zip`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            alert('Your bundle download has started!');
+          onClick={async () => {
+            try {
+              const data = await bundleAPI.getDownloadLink(id);
+              if (data.downloadUrl) {
+                const link = document.createElement('a');
+                link.href = data.downloadUrl;
+                link.download = `${bundleData.bundleTitle.replace(/\s+/g, '_')}_Bundle.zip`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                alert('Your bundle download has started! Using secured link.');
+              } else {
+                alert('Download link not found. Please try again.');
+              }
+            } catch (err) {
+              // Fallback if API fails
+              const link = document.createElement('a');
+              link.href = 'https://github.com/Soumit1k05/Emprios-website/archive/refs/heads/main.zip'; 
+              link.download = `${bundleData.bundleTitle.replace(/\s+/g, '_')}_Bundle.zip`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }
           }}
           className="px-8 py-4 bg-green-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-green-700 hover:scale-105 transition-all shadow-xl shadow-green-500/20 flex items-center gap-3 shrink-0"
         >

@@ -184,7 +184,7 @@ export default function Dashboard() {
                     <tr key={i} className="hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0">
                       <td className="py-3 px-2">
                         <div className="w-8 h-8 rounded bg-slate-200 overflow-hidden shadow-sm">
-                           <img src={`https://source.unsplash.com/random/100x100?product&sig=${i}`} alt="product" className="w-full h-full object-cover" />
+                           <img src={`https://images.unsplash.com/photo-${1600000000000 + i}?w=100&h=100&fit=crop`} alt="product" className="w-full h-full object-cover" />
                         </div>
                       </td>
                       <td className="py-3 px-2 text-slate-500">{row.id}</td>

@@ -7,7 +7,14 @@ const USE_MOCK_DATA = false; // Live mode active
 
 
 // Get token from localStorage
-const getToken = () => localStorage.getItem('token');
+const getToken = () => {
+  try {
+    const user = JSON.parse(localStorage.getItem('empiros_user'));
+    return user?.token || null;
+  } catch {
+    return null;
+  }
+};
 
 const headers = {
   'Content-Type': 'application/json'
@@ -65,6 +72,14 @@ export const bundleAPI = USE_MOCK_DATA ? mockBundleAPI : {
       headers: getAuthHeaders()
     });
     if (!response.ok) throw new Error('Failed to fetch bundle items');
+    return response.json();
+  },
+  
+  getDownloadLink: async (bundleId) => {
+    const response = await fetch(`${API_BASE_URL}/bundles/${bundleId}/download`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch download link');
     return response.json();
   }
 };
