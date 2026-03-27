@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Sun, Moon, Twitter, Facebook, Instagram, Youtube,
@@ -14,6 +14,8 @@ import RegistrationPage from './components/RegistrationPage';
 import LoginPage from './components/LoginPage';
 import Dashboard from './pages/Dashboard';
 import Logo from './components/Logo';
+import ProtectedRoute from './components/ProtectedRoute';
+import { Toaster } from 'react-hot-toast';
 import { useAuth } from './context/AuthContext';
 
 
@@ -66,11 +68,15 @@ const BundleCard = ({ name, price, features, popular }) => (
   </motion.div>
 );
 
-function AppContent() {
+export default function App() {
   const { user } = useAuth();
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('theme');
-    return saved ? JSON.parse(saved) : false;
+    try {
+      return saved ? JSON.parse(saved) : false;
+    } catch (e) {
+      return saved === 'dark';
+    }
   });
   const navigate = useNavigate();
   const location = useLocation();
@@ -94,7 +100,7 @@ function AppContent() {
 
   return (
     <div className="w-full min-h-screen flex flex-col items-center p-2 lg:p-8 relative">
-
+      <Toaster position="top-right" />
       <div className="bg-blobs">
         <div className="blob blob-1" />
         <div className="blob blob-2" />
@@ -216,22 +222,28 @@ function AppContent() {
               } />
 
               <Route path="/affiliate" element={
-                <motion.div key="affiliate" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}>
-                  <AffiliateDashboardPage />
-                </motion.div>
+                <ProtectedRoute>
+                  <motion.div key="affiliate" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}>
+                    <AffiliateDashboardPage />
+                  </motion.div>
+                </ProtectedRoute>
               } />
 
               <Route path="/dashboard" element={
-                <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <Dashboard />
-                </motion.div>
+                <ProtectedRoute>
+                  <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <Dashboard />
+                  </motion.div>
+                </ProtectedRoute>
               } />
 
 
               <Route path="/account" element={
-                <motion.div key="account" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <AccountPage onLogout={() => navigate('/')} />
-                </motion.div>
+                <ProtectedRoute>
+                  <motion.div key="account" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <AccountPage onLogout={() => navigate('/')} />
+                  </motion.div>
+                </ProtectedRoute>
               } />
 
 
@@ -264,10 +276,4 @@ function AppContent() {
   );
 }
 
-export default function App() {
-  return (
-    <Router>
-      <AppContent />
-    </Router>
-  );
-}
+

@@ -1,8 +1,9 @@
 import User from '../models/User.js';
-import generateToken from '../utils/generateToken.js';
+import { generateAccessToken, generateRefreshToken } from '../utils/generateToken.js';
+import jwt from 'jsonwebtoken';
 
 // Helper — shapes the user object returned in every response
-const userResponse = (user, token) => ({
+const userResponse = (user, accessToken, refreshToken) => ({
   _id: user._id,
   name: user.name,
   email: user.email,
@@ -19,7 +20,8 @@ const userResponse = (user, token) => ({
   referrals: user.referrals,
   earnings: user.earnings,
   payouts: user.payouts,
-  token,
+  token: accessToken,
+  refreshToken: refreshToken,
 });
 
 
@@ -31,12 +33,26 @@ export const registerUser = async (req, res) => {
     const { name, email, password, role, phone, company, bio } = req.body;
 
     if (!name || !email || !password) {
-      return res.status(400).json({ message: 'Please provide name, email and password' });
+      return res.status(400).json({ message: 'Missing required fields (name, email, password)' });
+    }
+
+    // Server-side validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Invalid email format' });
+    }
+
+    if (phone && !/^\d{10}$/.test(phone)) {
+      return res.status(400).json({ message: 'Phone number must be exactly 10 digits' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
     }
 
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ message: 'Email already registered' });
+      return res.status(400).json({ message: 'User with this email already exists' });
     }
 
     // Generate initial affiliate code
@@ -55,8 +71,10 @@ export const registerUser = async (req, res) => {
       lastLogin: new Date(),
     });
 
+    const accessToken = generateAccessToken(user._id, user.role);
+    const refreshToken = generateRefreshToken(user._id);
 
-    res.status(201).json(userResponse(user, generateToken(user._id, user.role)));
+    res.status(201).json(userResponse(user, accessToken, refreshToken));
   } catch (error) {
     res.status(500).json({ message: 'Registration failed', error: error.message });
   }
@@ -87,9 +105,38 @@ export const loginUser = async (req, res) => {
     user.lastLogin = new Date();
     await user.save({ validateBeforeSave: false });
 
-    res.json(userResponse(user, generateToken(user._id, user.role)));
+    const accessToken = generateAccessToken(user._id, user.role);
+    const refreshToken = generateRefreshToken(user._id);
+
+    res.json(userResponse(user, accessToken, refreshToken));
   } catch (error) {
     res.status(500).json({ message: 'Login failed', error: error.message });
+  }
+};
+
+// @desc    Refresh token
+// @route   POST /api/auth/refresh
+// @access  Public
+export const refreshToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+      return res.status(401).json({ message: 'Refresh token is required' });
+    }
+
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || 'refresh_secret_default');
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    const newAccessToken = generateAccessToken(user._id, user.role);
+    const newRefreshToken = generateRefreshToken(user._id);
+
+    res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
+  } catch (error) {
+    res.status(401).json({ message: 'Invalid or expired refresh token' });
   }
 };
 
@@ -131,7 +178,10 @@ export const updateUserProfile = async (req, res) => {
     }
 
     const updated = await user.save();
-    res.json(userResponse(updated, generateToken(updated._id, updated.role)));
+    
+    const accessToken = generateAccessToken(updated._id, updated.role);
+    const refreshToken = generateRefreshToken(updated._id);
+    res.json(userResponse(updated, accessToken, refreshToken));
   } catch (error) {
     res.status(500).json({ message: 'Profile update failed', error: error.message });
   }
@@ -152,7 +202,9 @@ export const generateAffiliateCode = async (req, res) => {
     user.affiliateCode = `${baseCode}${Math.floor(1000 + Math.random() * 9000)}`;
     
     await user.save();
-    res.json(userResponse(user, generateToken(user._id, user.role)));
+    const accessToken = generateAccessToken(user._id, user.role);
+    const refreshToken = generateRefreshToken(user._id);
+    res.json(userResponse(user, accessToken, refreshToken));
   } catch (error) {
     res.status(500).json({ message: 'Code generation failed', error: error.message });
   }
@@ -175,7 +227,9 @@ export const requestPayout = async (req, res) => {
     user.earnings -= amount;
     
     await user.save();
-    res.json(userResponse(user, generateToken(user._id, user.role)));
+    const accessToken = generateAccessToken(user._id, user.role);
+    const refreshToken = generateRefreshToken(user._id);
+    res.json(userResponse(user, accessToken, refreshToken));
   } catch (error) {
     res.status(500).json({ message: 'Payout request failed', error: error.message });
   }

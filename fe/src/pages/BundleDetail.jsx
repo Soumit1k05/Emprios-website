@@ -117,7 +117,7 @@ export default function BundleDetail() {
             />
             <div className="absolute inset-x-0 bottom-0 p-10 bg-gradient-to-t from-black/80 to-transparent flex flex-col gap-2">
                <span className="px-4 py-1.5 rounded-full bg-blue-600/80 text-white text-[10px] font-black uppercase tracking-widest w-fit backdrop-blur-md">Full Bundle Pack</span>
-               <h1 className="text-4xl lg:text-5xl font-black text-white uppercase tracking-tighter leading-none italic">{bundle.title}</h1>
+               <h1 className="text-4xl lg:text-5xl font-black text-white uppercase tracking-tighter leading-none">{bundle.title}</h1>
             </div>
           </motion.div>
 
@@ -125,7 +125,7 @@ export default function BundleDetail() {
           <div className="glass-pod p-10 rounded-[2.5rem] space-y-6">
             <div className="flex items-center gap-4">
                <div className="w-1.5 h-8 bg-blue-600 rounded-full" />
-               <h2 className="text-2xl font-black uppercase tracking-tighter italic">About this Bundle</h2>
+               <h2 className="text-2xl font-black uppercase tracking-tighter">About this Bundle</h2>
             </div>
             <p className="text-lg opacity-80 leading-relaxed font-medium">{bundle.description}</p>
           </div>
@@ -133,7 +133,7 @@ export default function BundleDetail() {
           {/* Side-by-Side Preview (Contents) */}
           <div className="glass-pod p-10 rounded-[2.5rem] space-y-8">
             <div className="flex items-center justify-between gap-4">
-              <h2 className="text-2xl font-black uppercase tracking-tighter italic flex items-center gap-3">
+              <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
                 <span className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500"><Check size={20} /></span> Contents Breakdown
               </h2>
               <span className="text-xs font-black uppercase tracking-widest opacity-40">{bundle.items.length} Premium Modules</span>
@@ -147,7 +147,7 @@ export default function BundleDetail() {
                 >
                    <div className="flex items-center justify-between mb-2">
                      <span className="px-3 py-1 bg-blue-500/20 text-blue-400 text-[10px] font-black uppercase rounded-lg border border-blue-500/20">{item.type}</span>
-                     <span className="text-[10px] font-black opacity-30 italic">Module {index + 1}</span>
+                     <span className="text-[10px] font-black opacity-30">Module {index + 1}</span>
                    </div>
                    <h3 className="font-black text-lg mb-1">{item.name}</h3>
                    <p className="text-xs opacity-60 line-clamp-2">{item.description}</p>

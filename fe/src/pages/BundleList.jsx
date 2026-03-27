@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingCart, Loader2 } from 'lucide-react';
+import { ShoppingCart, Zap, Loader2 } from 'lucide-react';
 import { bundleAPI } from '../api/client';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 export default function BundleList() {
   const [bundles, setBundle] = useState([]);
@@ -25,8 +27,27 @@ export default function BundleList() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <Loader2 className="animate-spin text-blue-500" size={40} />
+      <div className="space-y-8">
+        <div className="text-center space-y-2">
+          <Skeleton width={200} height={40} baseColor="rgba(255,255,255,0.05)" highlightColor="rgba(255,255,255,0.1)" />
+          <Skeleton width={400} height={15} baseColor="rgba(255,255,255,0.05)" highlightColor="rgba(255,255,255,0.1)" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pb-10">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="glass-pod p-8 rounded-3xl flex flex-col gap-6">
+              <Skeleton height={160} borderRadius="0.75rem" baseColor="rgba(255,255,255,0.05)" highlightColor="rgba(255,255,255,0.1)" />
+              <div className="space-y-2">
+                <Skeleton width="80%" height={24} baseColor="rgba(255,255,255,0.05)" highlightColor="rgba(255,255,255,0.1)" />
+                <Skeleton count={2} baseColor="rgba(255,255,255,0.05)" highlightColor="rgba(255,255,255,0.1)" />
+              </div>
+              <div className="space-y-2 flex-1">
+                <Skeleton width="40%" height={32} baseColor="rgba(255,255,255,0.05)" highlightColor="rgba(255,255,255,0.1)" />
+                <Skeleton width="60%" baseColor="rgba(255,255,255,0.05)" highlightColor="rgba(255,255,255,0.1)" />
+              </div>
+              <Skeleton height={48} borderRadius="1rem" baseColor="rgba(255,255,255,0.05)" highlightColor="rgba(255,255,255,0.1)" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -38,7 +59,7 @@ export default function BundleList() {
   return (
     <div className="space-y-8">
       <div className="text-center space-y-2">
-        <h2 className="text-4xl font-black uppercase tracking-tighter italic">Our Bundles</h2>
+        <h2 className="text-4xl font-black uppercase tracking-tighter">Our Bundles</h2>
         <p className="text-xs font-bold opacity-50 uppercase tracking-widest">Curated collections of resources • Instant access • Lifetime validity</p>
       </div>
 
@@ -109,7 +130,7 @@ export default function BundleList() {
         <div className="absolute top-0 right-0 p-8 opacity-20 group-hover:scale-110 transition-transform duration-500">
            <Zap className="text-blue-500" size={80} />
         </div>
-        <h3 className="text-3xl font-black uppercase italic tracking-tighter mb-4 relative z-10">Want to earn while you learn?</h3>
+        <h3 className="text-3xl font-black uppercase tracking-tighter mb-4 relative z-10">Want to earn while you learn?</h3>
         <p className="text-sm font-bold opacity-60 max-w-lg mx-auto mb-8 uppercase tracking-widest leading-relaxed relative z-10">Join our partner ecosystem and earn <span className="text-blue-500">60% commission</span> for every successful referral.</p>
         <button
           onClick={() => window.location.href = '/affiliate'}

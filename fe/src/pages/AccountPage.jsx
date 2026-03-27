@@ -7,7 +7,8 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-
+import api from '../api/apiClient';
+import { toast } from 'react-hot-toast';
 
 const DetailRow = ({ icon: Icon, label, value }) => (
   <div className="flex items-start gap-4 py-4 border-b border-white/10 last:border-0">
@@ -16,7 +17,7 @@ const DetailRow = ({ icon: Icon, label, value }) => (
     </div>
     <div className="flex-1 min-w-0">
       <p className="text-[9px] font-black uppercase tracking-widest opacity-40 mb-0.5">{label}</p>
-      <p className="text-sm font-bold truncate">{value || <span className="opacity-30 italic">Not provided</span>}</p>
+      <p className="text-sm font-bold truncate">{value || <span className="opacity-30">Not provided</span>}</p>
     </div>
   </div>
 );
@@ -40,8 +41,6 @@ export default function AccountPage({ onLogout }) {
   const { user, login, logout } = useAuth();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [saveMsg, setSaveMsg] = useState('');
-  const [saveType, setSaveType] = useState('success');
   const [form, setForm] = useState({
     name: user?.name || '',
     phone: user?.phone || '',
@@ -55,20 +54,16 @@ export default function AccountPage({ onLogout }) {
     const fetchProfile = async () => {
       if (!user?.token) return;
       try {
-        const res = await fetch('http://localhost:5000/api/auth/profile', {
-          headers: { Authorization: `Bearer ${user.token}` }
+        const res = await api.get('/auth/profile');
+        const data = res.data;
+        login({ ...data, token: user.token, refreshToken: user.refreshToken }); // update context
+        setForm({
+          name: data.name || '',
+          phone: data.phone || '',
+          company: data.company || '',
+          bio: data.bio || '',
+          profilePic: data.profilePic || '',
         });
-        if (res.ok) {
-          const data = await res.json();
-          login({ ...data, token: user.token }); // update context
-          setForm({
-            name: data.name || '',
-            phone: data.phone || '',
-            company: data.company || '',
-            bio: data.bio || '',
-            profilePic: data.profilePic || '',
-          });
-        }
       } catch (err) {
         console.error('Failed to fetch profile:', err);
       }
@@ -82,30 +77,15 @@ export default function AccountPage({ onLogout }) {
 
   const handleSave = async () => {
     setSaving(true);
-    setSaveMsg('');
-    setSaveType('success');
     try {
-      const res = await fetch('http://localhost:5000/api/auth/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        login(data); // update context + localStorage with new data
-        setEditing(false);
-        setSaveMsg('Profile updated successfully.');
-        setTimeout(() => setSaveMsg(''), 3000);
-      } else {
-        setSaveType('error');
-        setSaveMsg(data.message || 'Update failed.');
-      }
-    } catch {
-      setSaveType('error');
-      setSaveMsg('Server error. Try again.');
+      const res = await api.put('/auth/profile', form);
+      const data = res.data;
+      
+      login(data); // update context + localStorage with new data
+      setEditing(false);
+      toast.success('Profile updated successfully.');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Update failed.');
     } finally {
       setSaving(false);
     }
@@ -195,25 +175,6 @@ export default function AccountPage({ onLogout }) {
         </button>
       </div>
 
-
-      {/* ── Save message ── */}
-      <AnimatePresence>
-        {saveMsg && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className={`px-5 py-3 rounded-2xl border text-xs font-bold ${
-              saveType === 'success' 
-                ? 'bg-green-500/10 text-green-400 border-green-500/20' 
-                : 'bg-red-500/10 text-red-400 border-red-500/20'
-            }`}
-          >
-            {saveMsg}
-          </motion.div>
-
-        )}
-      </AnimatePresence>
 
       {/* ── Edit Form ── */}
       <AnimatePresence>

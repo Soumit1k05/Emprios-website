@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import Logo from './Logo';
 import { useAuth } from '../context/AuthContext';
+import api from '../api/apiClient';
+import { toast } from 'react-hot-toast';
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -10,7 +12,6 @@ export default function LoginPage() {
     password: '',
   });
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ type: '', text: '' });
   const { login } = useAuth();
 
   const handleChange = (e) => {
@@ -20,30 +21,18 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage({ type: '', text: '' });
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await api.post('/auth/login', formData);
+      const data = response.data;
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage({ type: 'success', text: 'Login successful! Redirecting...' });
-        login(data);
-        setTimeout(() => {
-          window.location.href = '/account';
-        }, 1500);
-      } else {
-        setMessage({ type: 'error', text: data.message || 'Login failed. Please check your credentials.' });
-      }
+      toast.success('Login successful! Redirecting...');
+      login(data);
+      setTimeout(() => {
+        window.location.href = '/account';
+      }, 1500);
     } catch (error) {
-      setMessage({ type: 'error', text: 'Server error. Please check if the backend is running.' });
+      toast.error(error.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
@@ -59,7 +48,7 @@ export default function LoginPage() {
       >
         <div className="flex flex-col items-center mb-8">
            <Logo size="h-12" className="mb-4" />
-          <h2 className="text-3xl font-black uppercase tracking-tighter italic">Welcome Back</h2>
+          <h2 className="text-3xl font-black uppercase tracking-tighter">Welcome Back</h2>
           <p className="text-xs font-bold opacity-50 uppercase tracking-widest mt-2">Sign in to your Empiros account.</p>
         </div>
 
@@ -95,18 +84,6 @@ export default function LoginPage() {
               />
             </div>
           </div>
-
-          {message.text && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              className={`p-4 rounded-xl text-[10px] font-black uppercase tracking-widest ${
-                message.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
-              }`}
-            >
-              {message.text}
-            </motion.div>
-          )}
 
           <button
             type="submit"

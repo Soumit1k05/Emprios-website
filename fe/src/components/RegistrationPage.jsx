@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { Mail, Lock, User, ArrowRight, Loader2, Phone } from 'lucide-react';
 import Logo from './Logo';
 import { useAuth } from '../context/AuthContext';
-
+import api from '../api/apiClient';
+import { toast } from 'react-hot-toast';
 
 export default function RegistrationPage() {
   const [formData, setFormData] = useState({
@@ -13,7 +14,6 @@ export default function RegistrationPage() {
     phone: '',
   });
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ type: '', text: '' });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -23,32 +23,18 @@ export default function RegistrationPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage({ type: '', text: '' });
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await api.post('/auth/register', formData);
+      const data = response.data;
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage({ type: 'success', text: 'Registration successful! Welcome to Empiros.' });
-        login(data);
-        setTimeout(() => {
-          window.location.href = '/account';
-        }, 1500);
-      } else {
-        setMessage({ type: 'error', text: data.message || 'Registration failed. Please try again.' });
-      }
-
-
+      toast.success('Registration successful! Welcome to Empiros.');
+      login(data);
+      setTimeout(() => {
+        window.location.href = '/account';
+      }, 1500);
     } catch (error) {
-      setMessage({ type: 'error', text: 'Server error. Please check if the backend is running.' });
+      toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -64,7 +50,7 @@ export default function RegistrationPage() {
       >
         <div className="flex flex-col items-center mb-8">
            <Logo size="h-12" className="mb-4" />
-          <h2 className="text-3xl font-black uppercase tracking-tighter italic">Create Account</h2>
+          <h2 className="text-3xl font-black uppercase tracking-tighter">Create Account</h2>
           <p className="text-xs font-bold opacity-50 uppercase tracking-widest mt-2">Join the Empiros ecosystem today.</p>
         </div>
 
@@ -108,7 +94,7 @@ export default function RegistrationPage() {
               <input
                 type="tel"
                 name="phone"
-                placeholder="+1 234 567 8900"
+                placeholder="9876543210"
                 required
                 value={formData.phone}
                 onChange={handleChange}
@@ -133,18 +119,6 @@ export default function RegistrationPage() {
               />
             </div>
           </div>
-
-          {message.text && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              className={`p-4 rounded-xl text-[10px] font-black uppercase tracking-widest ${
-                message.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
-              }`}
-            >
-              {message.text}
-            </motion.div>
-          )}
 
           <button
             type="submit"

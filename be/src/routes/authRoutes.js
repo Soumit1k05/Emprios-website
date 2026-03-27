@@ -6,6 +6,7 @@ import {
   updateUserProfile,
   generateAffiliateCode,
   requestPayout,
+  refreshToken,
 } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -13,6 +14,7 @@ const router = express.Router();
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
+router.post('/refresh', refreshToken);
 router.get('/profile', protect, getUserProfile);
 router.put('/profile', protect, updateUserProfile);
 router.post('/affiliate', protect, generateAffiliateCode);
