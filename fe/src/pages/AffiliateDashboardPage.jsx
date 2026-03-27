@@ -1,385 +1,465 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Copy, Share2, TrendingUp, Users, Gift, ArrowUpRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { mockBundles } from '../api/mockData';
-import { useAuth } from '../context/AuthContext';
+import React, { useState } from 'react';
+import { MoreVertical, ArrowUp, ArrowDown, ChevronDown, Download, RefreshCw, Settings, BarChart2, Activity, PieChart } from 'lucide-react';
 
-export default function AffiliateDashboard() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [affiliateCode, setAffiliateCode] = useState(user?.affiliateCode || '');
-  const [stats, setStats] = useState({
-    totalEarnings: user?.earnings || 0,
-    totalSales: user?.referrals?.length || 0,
-    referralLink: `${window.location.origin}?ref=${user?.affiliateCode || ''}`,
-    commissionRate: 60, // Consistent with card UI
-  });
-  const [affiliateStats, setAffiliateStats] = useState(user?.payouts || []);
-  const [copied, setCopied] = useState('');
-  const [bundles, setBundles] = useState([]);
-  const [selectedBundle, setSelectedBundle] = useState('all');
+const Widget = ({ children, className = '' }) => (
+  <div className={`bg-white/5 backdrop-blur-md rounded-3xl shadow-xl border border-white/10 p-8 text-white ${className}`}>
+    {children}
+  </div>
+);
 
-  useEffect(() => {
-    // If not logged in, redirect
-    if (!user) {
-      navigate('/register');
-      return;
-    }
-
-    setAffiliateCode(user.affiliateCode || '');
-    
-    setStats({
-      totalEarnings: user.earnings || 0,
-      totalSales: user.referrals?.length || 0,
-      referralLink: `${window.location.origin}?ref=${user.affiliateCode || ''}`,
-      commissionRate: 60
-    });
-
-    setAffiliateStats(user.payouts || []);
-
-    // Load mock bundles for stats
-    setBundles(mockBundles || []);
-  }, [user, navigate]);
-
-  const copyToClipboard = (text, id) => {
-    navigator.clipboard.writeText(text);
-    setCopied(id);
-    setTimeout(() => setCopied(''), 2000);
-  };
-
-  const getReferralLink = (bundleId) => {
-    return `${window.location.origin}/bundle/${bundleId}?ref=${affiliateCode}`;
-  };
-
-  const getShareMessage = (bundleTitle) => {
-    return `Check out this amazing bundle "${bundleTitle}" - Get instant access to premium resources! Use my referral link to get the best deal.`;
-  };
-
-  const shareToWhatsApp = (link, message) => {
-    const text = `${message} ${link}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-  };
-
-  const shareToTwitter = (link, message) => {
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(message + ' ' + link)}`, '_blank');
-  };
-
-  const filteredStats = selectedBundle === 'all' 
-    ? affiliateStats 
-    : affiliateStats.filter(stat => stat.bundleId === selectedBundle);
-
+const ActionMenu = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center space-y-3"
-      >
-        <h1 className="text-4xl font-black uppercase tracking-normal flex justify-center gap-3 md:gap-4 flex-wrap">
-          <span>Affiliate</span>
-          <span>Dashboard</span>
-        </h1>
-        <p className="text-xs font-bold opacity-50 uppercase tracking-widest">Earn commissions by referring bundles</p>
-      </motion.div>
+    <div className="absolute top-8 right-0 z-10 w-36 bg-[#1a1b2e]/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl py-2 overflow-hidden">
+      <button onClick={onClose} className="w-full text-left px-4 py-2 text-xs font-bold opacity-80 hover:bg-white/10 hover:opacity-100 flex items-center gap-2 transition-colors">
+        <RefreshCw size={12} /> Refresh
+      </button>
+      <button onClick={onClose} className="w-full text-left px-4 py-2 text-xs font-bold opacity-80 hover:bg-white/10 hover:opacity-100 flex items-center gap-2 transition-colors">
+        <Settings size={12} /> Settings
+      </button>
+    </div>
+  );
+};
 
-      {/* Key Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0 }}
-          className="glass-pod p-8 rounded-3xl space-y-4"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-3xl">💰</span>
-            <TrendingUp className="text-green-500" size={24} />
-          </div>
-          <div>
-            <p className="text-xs opacity-60 uppercase tracking-widest">Total Earnings</p>
-            <p className="text-4xl font-black mt-2">₹{stats.totalEarnings}</p>
-          </div>
-          <p className="text-xs opacity-50">60% commission on each sale</p>
-        </motion.div>
+// --- DYNAMIC DATA MAPPING ---
+const chartDataMapping = {
+  '12 MONTHS': [
+    { label: 'Feb', val: 40, color: '#60a5fa' }, { label: 'Mar', val: 30, color: '#818cf8' }, 
+    { label: 'Apr', val: 60, color: '#a78bfa' }, { label: 'May', val: 50, color: '#c084fc' }, 
+    { label: 'Jun', val: 80, color: '#e879f9' }, { label: 'Jul', val: 45, color: '#f472b6' }, 
+    { label: 'Aug', val: 70, color: '#fb7185' }, { label: 'Sep', val: 90, color: '#f87171' }, 
+    { label: 'Oct', val: 65, color: '#fb923c' }, { label: 'Nov', val: 85, color: '#fbbf24' }, 
+    { label: 'Dec', val: 100, color: '#facc15' }, { label: 'Jan', val: 75, color: '#a3e635' }
+  ],
+  '6 MONTHS': [
+    { label: 'Aug', val: 35, color: '#fb7185' }, { label: 'Sep', val: 60, color: '#f87171' }, 
+    { label: 'Oct', val: 45, color: '#fb923c' }, { label: 'Nov', val: 75, color: '#fbbf24' }, 
+    { label: 'Dec', val: 95, color: '#facc15' }, { label: 'Jan', val: 80, color: '#a3e635' }
+  ],
+  '30 DAYS': [
+    { label: 'Wk 1', val: 60, color: '#34d399' }, { label: 'Wk 2', val: 45, color: '#2dd4bf' }, 
+    { label: 'Wk 3', val: 85, color: '#38bdf8' }, { label: 'Wk 4', val: 70, color: '#818cf8' }
+  ],
+  '7 DAYS': [
+    { label: 'Mon', val: 30, color: '#ef4444' }, { label: 'Tue', val: 50, color: '#f97316' }, 
+    { label: 'Wed', val: 75, color: '#f59e0b' }, { label: 'Thu', val: 40, color: '#84cc16' }, 
+    { label: 'Fri', val: 90, color: '#10b981' }, { label: 'Sat', val: 100, color: '#06b6d4' },
+    { label: 'Sun', val: 85, color: '#3b82f6' }
+  ]
+};
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="glass-pod p-8 rounded-3xl space-y-4"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-3xl">📊</span>
-            <Users className="text-blue-500" size={24} />
-          </div>
-          <div>
-            <p className="text-xs opacity-60 uppercase tracking-widest">Total Sales</p>
-            <p className="text-4xl font-black mt-2">{stats.totalSales}</p>
-          </div>
-          <p className="text-xs opacity-50">Referrals converted to sales</p>
-        </motion.div>
+export default function Dashboard() {
+  const glassIcons = ['📱', '💻', '🎧', '⌚', '🎮'];
+  
+  const [activeTimeFilter, setActiveTimeFilter] = useState('12 MONTHS');
+  const [chartType, setChartType] = useState('Area'); 
+  const [isExporting, setIsExporting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [openMenuId, setOpenMenuId] = useState(null);
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="glass-pod p-8 rounded-3xl space-y-4"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-3xl">🎯</span>
-            <Gift className="text-purple-500" size={24} />
-          </div>
-          <div>
-            <p className="text-xs opacity-60 uppercase tracking-widest">Commission Rate</p>
-            <p className="text-4xl font-black mt-2">{stats.commissionRate}%</p>
-          </div>
-          <p className="text-xs opacity-50">On every purchase</p>
-        </motion.div>
-      </div>
+  const timeFilters = ['12 MONTHS', '6 MONTHS', '30 DAYS', '7 DAYS'];
+  const totalPages = 12;
 
-      {/* Affiliate Code Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass-pod p-8 rounded-3xl space-y-6"
-      >
-        <h2 className="text-2xl font-black uppercase flex items-center gap-3">
-          <span>🔗</span>
-          <span className="flex gap-2 md:gap-3 flex-wrap">
-            <span>Your</span>
-            <span>Affiliate</span>
-            <span>Code</span>
-          </span>
-        </h2>
+  const handleExport = () => {
+    setIsExporting(true);
+    setTimeout(() => {
+      setIsExporting(false);
+      alert("PDF Exported Successfully!");
+    }, 1500);
+  };
 
-        <div className="bg-white/5 rounded-xl p-6 border border-white/10 space-y-4">
-          <div>
-            <p className="text-xs opacity-60 uppercase tracking-widest mb-2">Affiliate Code</p>
-            <div className="flex items-center gap-3">
-              <code className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 font-mono text-lg font-bold text-blue-300">
-                {affiliateCode}
-              </code>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => copyToClipboard(affiliateCode, 'code')}
-                className="p-3 hover:bg-white/10 rounded-lg transition-colors"
-              >
-                {copied === 'code' ? (
-                  <span className="text-green-500">✓</span>
-                ) : (
-                  <Copy size={20} />
-                )}
-              </motion.button>
-            </div>
-          </div>
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) setCurrentPage(newPage);
+  };
 
-          <div>
-            <p className="text-xs opacity-60 uppercase tracking-widest mb-2">Your Referral Link</p>
-            <div className="flex items-center gap-3">
-              <input
-                type="text"
-                value={stats.referralLink}
-                readOnly
-                className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-sm font-mono text-blue-300 overflow-hidden truncate"
-              />
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => copyToClipboard(stats.referralLink, 'link')}
-                className="p-3 hover:bg-white/10 rounded-lg transition-colors"
-              >
-                {copied === 'link' ? (
-                  <span className="text-green-500">✓</span>
-                ) : (
-                  <Copy size={20} />
-                )}
-              </motion.button>
-            </div>
-          </div>
-        </div>
+  const toggleMenu = (id) => setOpenMenuId(openMenuId === id ? null : id);
 
-        <div className="bg-green-500/20 border border-green-500/40 rounded-xl p-4">
-          <p className="text-xs text-green-300">
-            💡 Share your referral link with friends and earn 60% commission on each bundle purchase!
-          </p>
-        </div>
-      </motion.div>
+  const currentChartData = chartDataMapping[activeTimeFilter];
 
-      {/* Bundle Referral Links */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass-pod p-8 rounded-3xl space-y-6"
-      >
-        <h2 className="text-2xl font-black uppercase flex items-center gap-3">
-          <span>📦</span>
-          <span className="flex gap-2 md:gap-3 flex-wrap">
-            <span>Share</span>
-            <span>Bundle</span>
-            <span>Links</span>
-          </span>
-        </h2>
+  const generateAreaPath = (data, isLineOnly = false) => {
+    const w = 100;
+    const h = 40;
+    const step = w / (data.length - 1);
+    
+    let path = isLineOnly 
+      ? `M0,${h - (data[0].val * 0.35)}` 
+      : `M0,${h} L0,${h - (data[0].val * 0.35)}`;
 
-        <div className="space-y-3">
-          {bundles.map((bundle, index) => (
-            <motion.div
-              key={bundle._id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-colors"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <h3 className="font-bold text-base">{bundle.title}</h3>
-                  <p className="text-xs opacity-60 mt-1">
-                    Price: ₹{bundle.price} • Earn: ₹{Math.ceil(bundle.price * 0.6)}
-                  </p>
-                </div>
+    for (let i = 1; i < data.length; i++) {
+      const x = i * step;
+      const y = h - (data[i].val * 0.35);
+      path += ` L${x},${y}`;
+    }
+    
+    if (!isLineOnly) path += ` L${w},${h} Z`;
+    return path;
+  };
 
-                <div className="flex items-center gap-2">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    onClick={() => copyToClipboard(getReferralLink(bundle._id), `link-${bundle._id}`)}
-                    className="p-2 hover:bg-white/10 rounded-lg transition-colors text-blue-400"
-                    title="Copy link"
-                  >
-                    {copied === `link-${bundle._id}` ? (
-                      <span className="text-green-500">✓</span>
-                    ) : (
-                      <Copy size={18} />
-                    )}
-                  </motion.button>
-
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    onClick={() => shareToWhatsApp(getReferralLink(bundle._id), getShareMessage(bundle.title))}
-                    className="p-2 hover:bg-green-500/20 rounded-lg transition-colors text-green-400"
-                    title="Share on WhatsApp"
-                  >
-                    <Share2 size={18} />
-                  </motion.button>
-
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    onClick={() => shareToTwitter(getReferralLink(bundle._id), getShareMessage(bundle.title))}
-                    className="p-2 hover:bg-blue-500/20 rounded-lg transition-colors text-blue-400"
-                    title="Share on Twitter"
-                  >
-                    <Share2 size={18} />
-                  </motion.button>
-                </div>
+  const renderNativeChart = () => {
+    if (chartType === 'Bar') {
+      return (
+        <div className="w-full h-full flex items-end justify-between gap-1 sm:gap-2 pt-4">
+          {currentChartData.map((d, i) => (
+            <div key={i} className="flex-1 flex flex-col justify-end items-center h-full group relative">
+              <div 
+                className="w-full rounded-t-md transition-all duration-500 cursor-pointer opacity-80 hover:opacity-100 shadow-[0_0_10px_rgba(255,255,255,0.1)]"
+                style={{ height: `${d.val}%`, backgroundColor: d.color }}
+              ></div>
+              <div className="opacity-0 group-hover:opacity-100 absolute -top-8 bg-[#1a1b2e] border border-white/20 px-2 py-1 rounded text-xs font-bold transition-opacity whitespace-nowrap z-10 shadow-lg">
+                ${(d.val * 120).toLocaleString()}
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
-      </motion.div>
+      );
+    } 
+    
+    if (chartType === 'Donut') {
+      const totalVal = currentChartData.reduce((sum, d) => sum + d.val, 0);
+      let currentOffset = 0;
+      return (
+        <div className="w-full h-full flex items-center justify-center p-2">
+          <svg viewBox="0 0 50 50" className="max-h-full w-full max-w-[16rem] transform -rotate-90 drop-shadow-2xl overflow-visible">
+            <circle cx="25" cy="25" r="15.9155" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
+            
+            {currentChartData.map((d, i) => {
+              const dashVal = (d.val / totalVal) * 100;
+              const dashStr = `${dashVal} ${100 - dashVal}`;
+              const offsetStr = -currentOffset;
+              currentOffset += dashVal;
+              return (
+                <circle 
+                  key={i} cx="25" cy="25" r="15.9155" fill="none" 
+                  stroke={d.color} strokeWidth="8" 
+                  strokeDasharray={dashStr} strokeDashoffset={offsetStr}
+                  className="transition-all duration-1000 cursor-pointer hover:stroke-[10px]"
+                />
+              );
+            })}
+          </svg>
+        </div>
+      );
+    }
 
-      {/* Sales Tracking */}
-      {affiliateStats.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-pod p-8 rounded-3xl space-y-6"
-        >
-          <h2 className="text-2xl font-black uppercase flex items-center gap-3">
-            <span>📈</span>
-            <span className="flex gap-2 md:gap-3 flex-wrap">
-              <span>Recent</span>
-              <span>Sales</span>
-            </span>
-          </h2>
+    // Area Chart (SVG)
+    return (
+      <div className="w-full h-full flex items-end">
+        <svg viewBox="0 0 100 40" className="w-full h-full overflow-visible preserve-3d" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="dynamicGradient" x1="0" y1="0" x2="1" y2="0">
+              {currentChartData.map((d, i) => (
+                <stop key={i} offset={`${(i / (currentChartData.length - 1)) * 100}%`} stopColor={d.color} stopOpacity="0.5"/>
+              ))}
+            </linearGradient>
+            <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+              {currentChartData.map((d, i) => (
+                <stop key={i} offset={`${(i / (currentChartData.length - 1)) * 100}%`} stopColor={d.color} stopOpacity="1"/>
+              ))}
+            </linearGradient>
+            <linearGradient id="fadeGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="white" stopOpacity="1"/>
+              <stop offset="100%" stopColor="white" stopOpacity="0"/>
+            </linearGradient>
+            <mask id="fadeMask">
+              <rect x="0" y="0" width="100" height="40" fill="url(#fadeGradient)" />
+            </mask>
+          </defs>
 
-          <div className="space-y-3">
-            {affiliateStats.map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10"
+          {/* Area Fill */}
+          <path 
+            d={generateAreaPath(currentChartData, false)} 
+            fill="url(#dynamicGradient)" 
+            mask="url(#fadeMask)"
+            className="transition-all duration-700 ease-in-out" 
+          />
+          {/* Top Line (Now colorful!) */}
+          <path 
+            d={generateAreaPath(currentChartData, true)} 
+            fill="none" 
+            stroke="url(#lineGradient)" 
+            strokeWidth="0.8" 
+            className="transition-all duration-700 ease-in-out drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]"
+          />
+          {/* Data Points */}
+          {currentChartData.map((d, i) => (
+            <circle 
+              key={i} 
+              cx={i * (100 / (currentChartData.length - 1))} 
+              cy={40 - (d.val * 0.35)} 
+              r="1.5" 
+              fill="#1a1b2e" 
+              stroke={d.color} 
+              strokeWidth="0.5" 
+              className="transition-all duration-700 hover:r-[2.5]" 
+            />
+          ))}
+        </svg>
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex-1 overflow-y-auto custom-scroll p-6 pb-20 space-y-6">
+      
+      {/* Top Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Widget className="flex flex-col justify-between h-44 relative">
+          <div className="flex justify-between items-start">
+            <h3 className="text-xs opacity-60 uppercase tracking-widest">Today's Sale</h3>
+            <div className="relative">
+              <button onClick={() => toggleMenu('metric1')} className="text-white/40 hover:text-white transition-colors"><MoreVertical size={16} /></button>
+              <ActionMenu isOpen={openMenuId === 'metric1'} onClose={() => setOpenMenuId(null)} />
+            </div>
+          </div>
+          <div>
+             <div className="text-4xl font-black mt-2">$12,426</div>
+             <div className="flex items-center gap-1 mt-3 text-xs opacity-60">
+                <ArrowUp size={14} className="text-green-400" />
+                <span className="text-green-400 font-bold">+36%</span>
+                vs last month
+             </div>
+          </div>
+        </Widget>
+
+        <Widget className="flex flex-col justify-between h-44 relative">
+           <div className="flex justify-between items-start">
+            <h3 className="text-xs opacity-60 uppercase tracking-widest">Total Sales</h3>
+            <div className="relative">
+              <button onClick={() => toggleMenu('metric2')} className="text-white/40 hover:text-white transition-colors"><MoreVertical size={16} /></button>
+              <ActionMenu isOpen={openMenuId === 'metric2'} onClose={() => setOpenMenuId(null)} />
+            </div>
+          </div>
+          <div>
+             <div className="text-4xl font-black mt-2">$2,38,485</div>
+             <div className="flex items-center gap-1 mt-3 text-xs opacity-60">
+                <ArrowDown size={14} className="text-red-400" />
+                <span className="text-red-400 font-bold">-14%</span>
+                vs last month
+             </div>
+          </div>
+        </Widget>
+
+        <Widget className="flex flex-col justify-between h-44 relative">
+           <div className="flex justify-between items-start">
+            <h3 className="text-xs opacity-60 uppercase tracking-widest">Total Orders</h3>
+            <div className="relative">
+              <button onClick={() => toggleMenu('metric3')} className="text-white/40 hover:text-white transition-colors"><MoreVertical size={16} /></button>
+              <ActionMenu isOpen={openMenuId === 'metric3'} onClose={() => setOpenMenuId(null)} />
+            </div>
+          </div>
+          <div>
+             <div className="text-4xl font-black mt-2">84,382</div>
+             <div className="flex items-center gap-1 mt-3 text-xs opacity-60">
+                <ArrowUp size={14} className="text-green-400" />
+                <span className="text-green-400 font-bold">+36%</span>
+                vs last month
+             </div>
+          </div>
+        </Widget>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Sales Report Chart Container */}
+        <Widget className="col-span-2 relative h-[26rem] flex flex-col">
+          <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-6">
+            <div className="flex items-center gap-4">
+              <h3 className="text-lg font-black uppercase">Sales Report</h3>
+              <div className="hidden sm:flex bg-white/5 border border-white/10 rounded-lg p-1 gap-1">
+                {[
+                  { id: 'Area', icon: Activity },
+                  { id: 'Bar', icon: BarChart2 },
+                  { id: 'Donut', icon: PieChart }
+                ].map((type) => (
+                  <button
+                    key={type.id}
+                    onClick={() => setChartType(type.id)}
+                    title={`${type.id} Chart`}
+                    className={`p-1.5 rounded-md transition-all ${
+                      chartType === type.id ? 'bg-white/20 text-blue-300 shadow-sm' : 'text-white/40 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    <type.icon size={16} />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+              {timeFilters.map((filter) => (
+                <button 
+                  key={filter}
+                  onClick={() => setActiveTimeFilter(filter)}
+                  className={`px-3 py-2 rounded-full border transition-all duration-300 ${
+                    activeTimeFilter === filter 
+                    ? 'text-blue-300 bg-blue-500/20 border-blue-500/30' 
+                    : 'text-white/60 border-transparent hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  {filter}
+                </button>
+              ))}
+              <button 
+                onClick={handleExport}
+                disabled={isExporting}
+                className={`flex items-center gap-2 border px-4 py-2 rounded-full ml-2 transition-all duration-300 ${
+                  isExporting 
+                  ? 'bg-green-500/20 border-green-500/30 text-green-300' 
+                  : 'border-white/20 bg-white/5 hover:bg-white/10 text-white'
+                }`}
               >
-                <div className="flex-1">
-                  <p className="font-bold text-sm">Sale #{index + 1}</p>
-                  <p className="text-xs opacity-60 mt-1">
-                    {new Date(stat.lastSaleDate).toLocaleString()}
-                  </p>
+                {isExporting ? <RefreshCw size={14} className="animate-spin" /> : <Download size={14} />}
+                <span className="hidden md:inline">{isExporting ? 'EXPORTING...' : 'EXPORT PDF'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* FIX: min-h-0 prevents flexbox from stretching. Absolute inset ensures charts perfectly fit the empty space. */}
+          <div className="flex-1 w-full relative mt-2 min-h-0">
+            <div className="absolute inset-0">
+               {renderNativeChart()}
+            </div>
+          </div>
+          
+          {/* LABELS: Now safely locked inside the widget box! */}
+          <div className="flex justify-between text-[11px] font-bold opacity-40 mt-4 px-2 uppercase tracking-widest">
+            {currentChartData.map(m => <span key={m.label}>{m.label}</span>)}
+          </div>
+        </Widget>
+
+        {/* Traffic Sources */}
+        <Widget className="flex flex-col">
+          <div className="flex justify-between items-center mb-8">
+            <h3 className="text-lg font-black uppercase">Traffic Sources</h3>
+            <button className="flex items-center gap-1 text-xs font-bold opacity-60 bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg border border-white/10 hover:opacity-100 transition-all">
+               LAST 7 DAYS <ChevronDown size={14} />
+            </button>
+          </div>
+          <div className="space-y-6 flex-1 flex flex-col justify-center">
+            {[
+              { label: 'Direct', val: '1,43,382', pct: '75%', color: 'bg-blue-400' },
+              { label: 'Referral', val: '87,974', pct: '50%', color: 'bg-blue-500' },
+              { label: 'Social Media', val: '45,211', pct: '25%', color: 'bg-purple-500' },
+              { label: 'Twitter', val: '21,893', pct: '12%', color: 'bg-sky-400' },
+              { label: 'Facebook', val: '21,893', pct: '12%', color: 'bg-indigo-500' }
+            ].map((t,i) => (
+              <div key={i} className="flex flex-col gap-2">
+                <div className="flex justify-between text-xs font-bold opacity-80">
+                  <span>{t.label}</span>
+                  <span>{t.val}</span>
                 </div>
-                <div className="text-right">
-                  <p className="font-black text-green-400">+₹{stat.totalEarnings}</p>
-                  <p className="text-xs opacity-60">{stat.totalSales} sales</p>
+                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                  <div className={`h-full ${t.color} rounded-full`} style={{ width: t.pct }}></div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
-        </motion.div>
-      )}
+        </Widget>
+      </div>
 
-      {/* Marketing Tips */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass-pod p-8 rounded-3xl space-y-6"
-      >
-        <h2 className="text-2xl font-black uppercase flex items-center gap-3">
-          <span>💡</span>
-          <span className="flex gap-2 md:gap-3 flex-wrap">
-            <span>Marketing</span>
-            <span>Tips</span>
-          </span>
-        </h2>
-
-        <div className="space-y-3">
-          <div className="flex gap-4">
-            <span className="text-2xl flex-shrink-0">📱</span>
-            <div>
-              <p className="font-bold text-sm">Share on Social Media</p>
-              <p className="text-xs opacity-70">Use WhatsApp, Twitter, LinkedIn, or other social platforms. Our buttons make sharing easy!</p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+         {/* Total Bets */}
+         <Widget className="flex flex-col relative">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-black uppercase">Total Bets</h3>
+              <div className="relative">
+                <button onClick={() => toggleMenu('bets')} className="text-white/40 hover:text-white transition-colors"><MoreVertical size={16} /></button>
+                <ActionMenu isOpen={openMenuId === 'bets'} onClose={() => setOpenMenuId(null)} />
+              </div>
             </div>
-          </div>
-
-          <div className="flex gap-4">
-            <span className="text-2xl flex-shrink-0">👥</span>
-            <div>
-              <p className="font-bold text-sm">Target Your Audience</p>
-              <p className="text-xs opacity-70">Share bundle links with people interested in that subject matter (developers for Web Dev, students for Interview Prep, etc.)</p>
+            <div className="flex-1 flex flex-col items-center justify-center py-6">
+               <div className="relative w-48 h-48 flex items-center justify-center mb-8 drop-shadow-2xl">
+                 <svg viewBox="0 0 50 50" className="w-full h-full transform -rotate-90 overflow-visible">
+                    <circle cx="25" cy="25" r="15.9155" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
+                    <circle cx="25" cy="25" r="15.9155" fill="none" stroke="#3b82f6" strokeWidth="8" strokeDasharray="70 30" />
+                    <circle cx="25" cy="25" r="15.9155" fill="none" stroke="#facc15" strokeWidth="8" strokeDasharray="20 80" strokeDashoffset="-70" />
+                    <circle cx="25" cy="25" r="15.9155" fill="none" stroke="#f97316" strokeWidth="8" strokeDasharray="10 90" strokeDashoffset="-90" />
+                 </svg>
+                 
+                 <div className="absolute top-2 right-2 bg-yellow-400/20 text-yellow-400 px-2 py-0.5 rounded-md backdrop-blur-sm font-black text-xs border border-yellow-400/30">20%</div>
+                 <div className="absolute bottom-6 right-6 bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-md backdrop-blur-sm font-black text-xs border border-orange-500/30">10%</div>
+                 <div className="absolute inset-0 flex items-center justify-center flex-col">
+                   <div className="text-white font-black text-3xl">70%</div>
+                   <div className="text-[10px] font-bold opacity-60 uppercase">Mobile</div>
+                 </div>
+               </div>
+               <div className="w-full space-y-4">
+                 {[
+                   { label: 'Mobile', val: '$50,280', color: 'bg-blue-500' },
+                   { label: 'Laptop', val: '$30,160', color: 'bg-yellow-400' },
+                   { label: 'Watch', val: '$15,520', color: 'bg-orange-500' }
+                 ].map(item => (
+                   <div key={item.label} className="flex justify-between text-sm font-bold opacity-80">
+                     <span className="flex items-center gap-3"><div className={`w-3 h-3 rounded-full ${item.color} shadow-sm`} /> {item.label}</span>
+                     <span>{item.val}</span>
+                   </div>
+                 ))}
+               </div>
             </div>
-          </div>
+         </Widget>
 
-          <div className="flex gap-4">
-            <span className="text-2xl flex-shrink-0">🔗</span>
-            <div>
-              <p className="font-bold text-sm">Use Short Links</p>
-              <p className="text-xs opacity-70">Copy and share the bundle links directly. Each link includes your affiliate code automatically.</p>
+         {/* Recent Customers */}
+         <Widget className="col-span-2 flex flex-col overflow-hidden">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-black uppercase">Recent Customers</h3>
+              <button className="flex items-center gap-1 text-sm font-bold text-blue-400 hover:text-blue-300 hover:underline transition-all">
+                 View All &rarr;
+              </button>
             </div>
-          </div>
-
-          <div className="flex gap-4">
-            <span className="text-2xl flex-shrink-0">💬</span>
-            <div>
-              <p className="font-bold text-sm">Write Reviews</p>
-              <p className="text-xs opacity-70">Share your honest feedback about bundles. People trust recommendations from real users.</p>
+            <div className="overflow-x-auto w-full flex-1">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="text-xs font-bold opacity-50 uppercase tracking-widest border-b border-white/10">
+                    <th className="pb-4 px-4 font-bold">Product</th>
+                    <th className="pb-4 px-4 font-bold">Orders ID</th>
+                    <th className="pb-4 px-4 font-bold">Customer Name</th>
+                    <th className="pb-4 px-4 font-bold">Date</th>
+                    <th className="pb-4 px-4 font-bold">Price</th>
+                    <th className="pb-4 px-4 font-bold">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm font-semibold">
+                  {[
+                    { id: '#202395', name: 'Ripon Ahmed', date: '1 Jan 24', price: '$20,584', status: 'Complete', statColor: 'text-green-400 bg-green-500/20 border border-green-500/30' },
+                    { id: '#202396', name: 'Leslie Alexander', date: '2 Jan 24', price: '$11,234', status: 'Pending', statColor: 'text-orange-400 bg-orange-500/20 border border-orange-500/30' },
+                    { id: '#202397', name: 'Ralph Edwards', date: '3 Jan 24', price: '$11,159', status: 'Complete', statColor: 'text-green-400 bg-green-500/20 border border-green-500/30' },
+                    { id: '#202398', name: 'Ronaid Richards', date: '4 Jan 24', price: '$10,483', status: 'Complete', statColor: 'text-green-400 bg-green-500/20 border border-green-500/30' },
+                    { id: '#202399', name: 'Devon Lane', date: '6 Jan 24', price: '$9,084', status: 'Pending', statColor: 'text-orange-400 bg-orange-500/20 border border-orange-500/30' }
+                  ].map((row, i) => (
+                    <tr key={i} className="hover:bg-white/5 transition-colors border-b border-white/5 last:border-0">
+                      <td className="py-4 px-4">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 flex items-center justify-center text-xl shadow-[0_4px_10px_rgba(0,0,0,0.1)] backdrop-blur-md">
+                           {glassIcons[i % glassIcons.length]}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 opacity-60 font-mono">{row.id}</td>
+                      <td className="py-4 px-4">{row.name}</td>
+                      <td className="py-4 px-4 flex items-center gap-2 opacity-60 mt-3"><div className="w-2 h-2 rounded-full bg-white/40"></div> {row.date}</td>
+                      <td className="py-4 px-4 font-black">{row.price}</td>
+                      <td className="py-4 px-4">
+                        <span className={`px-3 py-1.5 rounded-lg text-[10px] uppercase font-bold tracking-wider ${row.statColor}`}>
+                          {row.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Back Button */}
-      <motion.button
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={() => navigate('/bundles')}
-        className="w-full py-4 bg-white/10 hover:bg-white/20 rounded-3xl font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-3"
-      >
-        <span>←</span>
-        <span className="flex gap-2">
-          <span>Back</span>
-          <span>to</span>
-          <span>Bundles</span>
-        </span>
-      </motion.button>
+            
+            <div className="flex justify-between items-center mt-6 text-xs font-bold opacity-60">
+               <div>Show <span className="bg-white/10 px-2 py-1 rounded-md border border-white/20">5</span> from {totalPages}</div>
+               <div className="flex items-center gap-1">
+                 <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${currentPage === 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10'}`}>&lt;</button>
+                 {[1, 2, 3].map(num => (
+                    <button key={num} onClick={() => handlePageChange(num)} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${currentPage === num ? 'bg-blue-500 text-white shadow-lg font-black border border-blue-400/50' : 'hover:bg-white/10'}`}>{num}</button>
+                 ))}
+                 <span className="px-1">...</span>
+                 <button onClick={() => handlePageChange(totalPages)} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${currentPage === totalPages ? 'bg-blue-500 text-white shadow-lg font-black border border-blue-400/50' : 'hover:bg-white/10'}`}>{totalPages}</button>
+                 <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${currentPage === totalPages ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10'}`}>&gt;</button>
+               </div>
+            </div>
+         </Widget>
+      </div>
     </div>
   );
 }
