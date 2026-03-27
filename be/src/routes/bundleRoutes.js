@@ -1,3 +1,4 @@
+import express from 'express';
 import { getAllBundles, getBundleById, seedBundles, downloadBundle, getBundleItems } from '../controllers/bundleController.js';
 
 const router = express.Router();
