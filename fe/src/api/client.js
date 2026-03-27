@@ -3,7 +3,8 @@
 import { mockBundleAPI, mockAuthAPI } from './mockData';
 
 const API_BASE_URL = 'http://localhost:5000/api';
-const USE_MOCK_DATA = true; // Set to false when backend is ready
+const USE_MOCK_DATA = false; // Live mode active
+
 
 // Get token from localStorage
 const getToken = () => localStorage.getItem('token');

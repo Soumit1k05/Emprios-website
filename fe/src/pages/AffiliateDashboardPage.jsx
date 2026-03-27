@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Copy, Share2, TrendingUp, Users, Gift, ArrowUpRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { mockBundles } from '../api/mockData';
+
 
 export default function AffiliateDashboard() {
   const navigate = useNavigate();
@@ -52,9 +54,9 @@ export default function AffiliateDashboard() {
     });
 
     // Load mock bundles for stats
-    const { mockBundles } = require('../api/mockData');
     setBundles(mockBundles || []);
-  }, []);
+  }, [affiliateCode]);
+
 
   const copyToClipboard = (text, id) => {
     navigator.clipboard.writeText(text);

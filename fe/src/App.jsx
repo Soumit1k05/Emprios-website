@@ -11,7 +11,10 @@ import BundleSuccess from './pages/BundleSuccess';
 import AffiliateDashboardPage from './pages/AffiliateDashboardPage';
 import AccountPage from './pages/AccountPage';
 import RegistrationPage from './components/RegistrationPage';
-import './App.css';
+import Dashboard from './pages/Dashboard';
+
+
+
 
 
 const NavItem = ({ children, active, onClick }) => (
@@ -170,26 +173,18 @@ function AppContent() {
               } />
 
               <Route path="/dashboard" element={
-                <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">
-                  <div className="glass-pod p-10 min-h-[500px] flex items-center justify-center relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 group-hover:opacity-100 transition-opacity" />
-                    <div className="text-center space-y-4 relative z-10">
-                      <div className="w-20 h-20 rounded-3xl bg-blue-600/10 flex items-center justify-center mx-auto mb-6">
-                         <Zap className="text-blue-500" size={40} />
-                      </div>
-                      <h3 className="text-3xl font-black uppercase italic tracking-tighter">Prototype Mode Active</h3>
-                      <p className="text-sm font-bold opacity-60 max-w-xs mx-auto">This represents the live scaling environment of Empiros. All nodes are ready for deployment.</p>
-                      <button onClick={() => navigate('/')} className="px-6 py-2 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">Back to Home</button>
-                    </div>
-                  </div>
+                <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <Dashboard />
                 </motion.div>
               } />
+
 
               <Route path="/account" element={
                 <motion.div key="account" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <AccountPage onLogout={() => navigate('/')} />
                 </motion.div>
               } />
+
 
               <Route path="/register" element={
                 <motion.div key="register" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
