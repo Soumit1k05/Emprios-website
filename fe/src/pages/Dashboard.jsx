@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MoreVertical, ArrowUp, ArrowDown, ChevronDown, Download, RefreshCw, Settings, BarChart2, TrendingUp, Activity, Layers } from 'lucide-react';
+import { MoreVertical, ArrowUp, ArrowDown, ChevronDown, Download, RefreshCw, Settings, BarChart2, Activity, PieChart } from 'lucide-react';
 
 const Widget = ({ children, className = '' }) => (
   <div className={`bg-white/5 backdrop-blur-md rounded-3xl shadow-xl border border-white/10 p-8 text-white ${className}`}>
@@ -7,6 +7,7 @@ const Widget = ({ children, className = '' }) => (
   </div>
 );
 
+// Small reusable dropdown component for the 3-dot menus
 const ActionMenu = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   return (
@@ -21,148 +22,12 @@ const ActionMenu = ({ isOpen, onClose }) => {
   );
 };
 
-// --- MOCK DATA FOR DIFFERENT TIMEFRAMES ---
-const chartData = {
-  '12 MONTHS': [
-    { name: 'Feb', sales: 4000, target: 2400 }, { name: 'Mar', sales: 3000, target: 1398 },
-    { name: 'Apr', sales: 2000, target: 9800 }, { name: 'May', sales: 2780, target: 3908 },
-    { name: 'Jun', sales: 1890, target: 4800 }, { name: 'Jul', sales: 2390, target: 3800 },
-    { name: 'Aug', sales: 3490, target: 4300 }, { name: 'Sep', sales: 4200, target: 3100 },
-    { name: 'Oct', sales: 5100, target: 4100 }, { name: 'Nov', sales: 6000, target: 5300 },
-    { name: 'Dec', sales: 7100, target: 6100 }, { name: 'Jan', sales: 8500, target: 7500 }
-  ],
-  '6 MONTHS': [
-    { name: 'Aug', sales: 3490, target: 4300 }, { name: 'Sep', sales: 4200, target: 3100 },
-    { name: 'Oct', sales: 5100, target: 4100 }, { name: 'Nov', sales: 6000, target: 5300 },
-    { name: 'Dec', sales: 7100, target: 6100 }, { name: 'Jan', sales: 8500, target: 7500 }
-  ],
-  '30 DAYS': [
-    { name: 'Wk 1', sales: 1200, target: 1000 }, { name: 'Wk 2', sales: 1800, target: 1500 },
-    { name: 'Wk 3', sales: 2400, target: 2000 }, { name: 'Wk 4', sales: 2100, target: 2500 }
-  ],
-  '7 DAYS': [
-    { name: 'Mon', sales: 150, target: 200 }, { name: 'Tue', sales: 230, target: 210 },
-    { name: 'Wed', sales: 340, target: 250 }, { name: 'Thu', sales: 290, target: 300 },
-    { name: 'Fri', sales: 450, target: 350 }, { name: 'Sat', sales: 600, target: 500 },
-    { name: 'Sun', sales: 550, target: 480 }
-  ]
-};
-
-// --- PURE REACT & SVG CHART COMPONENT (No Libraries Required) ---
-const CustomSVGChart = ({ data, type }) => {
-  const width = 800;
-  const height = 200;
-  
-  // Find max value to scale the chart dynamically
-  const maxVal = Math.max(...data.map(d => Math.max(d.sales, d.target))) || 1;
-  const adjustedMax = maxVal * 1.1; // Add 10% padding to the top
-
-  // Utility to scale X and Y coordinates
-  const getX = (index) => (index / (data.length - 1 || 1)) * width;
-  const getBarX = (index) => (index / data.length) * width;
-  const getY = (val) => height - (val / adjustedMax) * height;
-
-  // Path generators
-  const makeLinePath = (key) => data.map((d, i) => `${i === 0 ? 'M' : 'L'} ${getX(i)} ${getY(d[key])}`).join(' ');
-  const makeAreaPath = (key) => `${makeLinePath(key)} L ${width} ${height} L 0 ${height} Z`;
-
-  return (
-    <div className="w-full h-full flex flex-col relative">
-      <div className="flex-1 w-full relative">
-        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible preserve-3d" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.5"/>
-              <stop offset="100%" stopColor="#60a5fa" stopOpacity="0"/>
-            </linearGradient>
-            <linearGradient id="colorTarget" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.4"/>
-              <stop offset="100%" stopColor="#fbbf24" stopOpacity="0"/>
-            </linearGradient>
-          </defs>
-
-          {/* Grid Lines */}
-          {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => (
-            <line key={i} x1="0" y1={height * ratio} x2={width} y2={height * ratio} stroke="rgba(255,255,255,0.05)" strokeDasharray="4 4" />
-          ))}
-
-          {/* Render based on selected type */}
-          {(type === 'Area' || type === 'Line') && (
-            <>
-              {type === 'Area' && <path d={makeAreaPath('target')} fill="url(#colorTarget)" />}
-              <path d={makeLinePath('target')} fill="none" stroke="#fbbf24" strokeWidth="2" strokeDasharray={type === 'Line' ? "5 5" : "0"} />
-              
-              {type === 'Area' && <path d={makeAreaPath('sales')} fill="url(#colorSales)" />}
-              <path d={makeLinePath('sales')} fill="none" stroke="#60a5fa" strokeWidth="3" />
-
-              {/* Data points for Line/Area */}
-              {data.map((d, i) => (
-                <g key={i}>
-                  <circle cx={getX(i)} cy={getY(d.target)} r="4" fill="#1a1b2e" stroke="#fbbf24" strokeWidth="2">
-                    <title>Target: ${d.target}</title>
-                  </circle>
-                  <circle cx={getX(i)} cy={getY(d.sales)} r="4" fill="#1a1b2e" stroke="#60a5fa" strokeWidth="2" className="hover:r-[6px] transition-all cursor-pointer">
-                    <title>{d.name} Sales: ${d.sales}</title>
-                  </circle>
-                </g>
-              ))}
-            </>
-          )}
-
-          {type === 'Bar' && (
-            data.map((d, i) => {
-              const barWidth = (width / data.length) * 0.3;
-              const spacing = barWidth * 0.1;
-              const xCenter = getBarX(i) + (width / data.length) / 2;
-              
-              return (
-                <g key={i}>
-                  <rect x={xCenter - barWidth - spacing} y={getY(d.sales)} width={barWidth} height={height - getY(d.sales)} fill="#60a5fa" rx="2" className="hover:opacity-80 transition-opacity cursor-pointer"><title>Sales: ${d.sales}</title></rect>
-                  <rect x={xCenter + spacing} y={getY(d.target)} width={barWidth} height={height - getY(d.target)} fill="#fbbf24" rx="2" className="hover:opacity-80 transition-opacity cursor-pointer"><title>Target: ${d.target}</title></rect>
-                </g>
-              );
-            })
-          )}
-
-          {type === 'Mixed' && (
-            <>
-              {/* Background Bars for Target */}
-              {data.map((d, i) => {
-                const barWidth = (width / data.length) * 0.4;
-                const xCenter = getBarX(i) + (width / data.length) / 2;
-                return (
-                  <rect key={i} x={xCenter - barWidth/2} y={getY(d.target)} width={barWidth} height={height - getY(d.target)} fill="rgba(251, 191, 36, 0.3)" rx="4" className="hover:fill-[rgba(251,191,36,0.5)] transition-colors cursor-pointer">
-                    <title>Target: ${d.target}</title>
-                  </rect>
-                );
-              })}
-              {/* Foreground Line for Sales */}
-              <path d={makeLinePath('sales')} fill="none" stroke="#60a5fa" strokeWidth="3" />
-              {data.map((d, i) => (
-                <circle key={i} cx={getX(i)} cy={getY(d.sales)} r="4" fill="#1a1b2e" stroke="#60a5fa" strokeWidth="2" className="hover:r-[6px] transition-all cursor-pointer">
-                  <title>{d.name} Sales: ${d.sales}</title>
-                </circle>
-              ))}
-            </>
-          )}
-        </svg>
-      </div>
-      
-      {/* X-Axis Labels */}
-      <div className="flex justify-between text-[11px] font-bold opacity-40 mt-4 uppercase tracking-widest w-full px-2">
-        {data.map((d, i) => (
-          <span key={i} className="text-center w-8 -ml-4">{d.name}</span>
-        ))}
-      </div>
-    </div>
-  );
-};
-
 export default function Dashboard() {
   const glassIcons = ['📱', '💻', '🎧', '⌚', '🎮'];
   
+  // States for interactive elements
   const [activeTimeFilter, setActiveTimeFilter] = useState('12 MONTHS');
-  const [chartType, setChartType] = useState('Area'); // 'Area', 'Line', 'Bar', 'Mixed'
+  const [chartType, setChartType] = useState('Area'); // 'Area', 'Bar', 'Donut'
   const [isExporting, setIsExporting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -184,12 +49,86 @@ export default function Dashboard() {
 
   const toggleMenu = (id) => setOpenMenuId(openMenuId === id ? null : id);
 
+  // Raw mock data for native CSS/SVG rendering (Values represent percentages 0-100)
+  const mockChartData = [
+    { label: 'Feb', val: 40, color: '#60a5fa' }, { label: 'Mar', val: 30, color: '#818cf8' }, 
+    { label: 'Apr', val: 60, color: '#a78bfa' }, { label: 'May', val: 50, color: '#c084fc' }, 
+    { label: 'Jun', val: 80, color: '#e879f9' }, { label: 'Jul', val: 45, color: '#f472b6' }, 
+    { label: 'Aug', val: 70, color: '#fb7185' }, { label: 'Sep', val: 90, color: '#f87171' }, 
+    { label: 'Oct', val: 65, color: '#fb923c' }, { label: 'Nov', val: 85, color: '#fbbf24' }, 
+    { label: 'Dec', val: 100, color: '#facc15' }, { label: 'Jan', val: 75, color: '#a3e635' }
+  ];
+
+  // Renders the chart using pure HTML/CSS/SVG based on selection
+  const renderNativeChart = () => {
+    if (chartType === 'Bar') {
+      return (
+        <div className="w-full h-full flex items-end justify-between gap-1 sm:gap-2 pt-4">
+          {mockChartData.map((d, i) => (
+            <div key={i} className="flex-1 flex flex-col justify-end items-center h-full group relative">
+              <div 
+                className="w-full bg-blue-500/40 hover:bg-blue-400 rounded-t-md transition-all duration-300 cursor-pointer"
+                style={{ height: `${d.val}%` }}
+              ></div>
+              {/* Simple CSS Tooltip on Hover */}
+              <div className="opacity-0 group-hover:opacity-100 absolute -top-8 bg-[#1a1b2e] border border-white/20 px-2 py-1 rounded text-xs font-bold transition-opacity whitespace-nowrap z-10 shadow-lg">
+                ${(d.val * 120).toLocaleString()}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    } 
+    
+    if (chartType === 'Donut') {
+      // Building a pure SVG Donut chart for the main sales area
+      let currentOffset = 0;
+      return (
+        <div className="w-full h-full flex items-center justify-center">
+          <svg viewBox="0 0 36 36" className="w-48 h-48 sm:w-64 sm:h-64 transform -rotate-90 drop-shadow-2xl">
+            {/* Background Track */}
+            <path className="text-white/5" strokeWidth="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            {/* Data Slices */}
+            {mockChartData.map((d, i) => {
+              const dashVal = (d.val / 800) * 100; // Scaling down so it forms a full circle
+              const dashStr = `${dashVal}, 100`;
+              const offsetStr = `-${currentOffset}`;
+              currentOffset += dashVal;
+              return (
+                <path 
+                  key={i} stroke={d.color} strokeWidth="4" strokeDasharray={dashStr} strokeDashoffset={offsetStr} fill="none" 
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
+                  className="transition-all duration-1000 hover:stroke-[5px] cursor-pointer"
+                />
+              );
+            })}
+          </svg>
+        </div>
+      );
+    }
+
+    // Default: Area Chart (SVG)
+    return (
+      <svg viewBox="0 0 100 40" className="w-full h-full overflow-visible preserve-3d" preserveAspectRatio="none">
+        {/* Fill Area */}
+        <path d="M0,35 Q10,25 20,32 T40,20 T60,15 T80,10 T100,2 L100,40 L0,40 Z" fill="url(#gradient-blue)" className="transition-all duration-500" />
+        {/* Top Edge Line (styled to look like the edge of the area, not a line chart) */}
+        <path d="M0,35 Q10,25 20,32 T40,20 T60,15 T80,10 T100,2" fill="none" stroke="#60a5fa" strokeWidth="0.5" />
+        <defs>
+          <linearGradient id="gradient-blue" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.4"/>
+            <stop offset="100%" stopColor="#60a5fa" stopOpacity="0"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  };
+
   return (
     <div className="flex-1 overflow-y-auto custom-scroll p-6 pb-20 space-y-6">
       
       {/* Top Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Metric 1 */}
         <Widget className="flex flex-col justify-between h-44 relative">
           <div className="flex justify-between items-start">
             <h3 className="text-xs opacity-60 uppercase tracking-widest">Today's Sale</h3>
@@ -208,7 +147,6 @@ export default function Dashboard() {
           </div>
         </Widget>
 
-        {/* Metric 2 */}
         <Widget className="flex flex-col justify-between h-44 relative">
            <div className="flex justify-between items-start">
             <h3 className="text-xs opacity-60 uppercase tracking-widest">Total Sales</h3>
@@ -227,7 +165,6 @@ export default function Dashboard() {
           </div>
         </Widget>
 
-        {/* Metric 3 */}
         <Widget className="flex flex-col justify-between h-44 relative">
            <div className="flex justify-between items-start">
             <h3 className="text-xs opacity-60 uppercase tracking-widest">Total Orders</h3>
@@ -248,19 +185,17 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Sales Report Chart */}
+        {/* Sales Report Chart Container */}
         <Widget className="col-span-2 relative h-[26rem] flex flex-col">
           <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-6">
             <div className="flex items-center gap-4">
               <h3 className="text-lg font-black uppercase">Sales Report</h3>
-              {/* Chart Type Selectors */}
+              {/* Native Chart Type Selectors */}
               <div className="hidden sm:flex bg-white/5 border border-white/10 rounded-lg p-1 gap-1">
                 {[
                   { id: 'Area', icon: Activity },
-                  { id: 'Line', icon: TrendingUp },
                   { id: 'Bar', icon: BarChart2 },
-                  { id: 'Mixed', icon: Layers }
+                  { id: 'Donut', icon: PieChart }
                 ].map((type) => (
                   <button
                     key={type.id}
@@ -305,9 +240,12 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Custom SVG Render Container */}
-          <div className="flex-1 w-full min-h-0 mt-2">
-            <CustomSVGChart data={chartData[activeTimeFilter]} type={chartType} />
+          <div className="flex-1 w-full flex items-end relative overflow-hidden mt-2">
+            {renderNativeChart()}
+          </div>
+          
+          <div className="flex justify-between text-[11px] font-bold opacity-40 mt-4 px-2 uppercase tracking-widest">
+            {mockChartData.map(m => <span key={m.label}>{m.label}</span>)}
           </div>
         </Widget>
 
@@ -342,7 +280,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-         {/* Total Bets (Pie Chart Placeholder) */}
+         {/* Native Pure SVG Donut Chart for Total Bets */}
          <Widget className="flex flex-col relative">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-black uppercase">Total Bets</h3>
@@ -352,11 +290,22 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex-1 flex flex-col items-center justify-center py-6">
-               <div className="relative w-48 h-48 flex items-center justify-center mb-8">
-                 <div className="w-full h-full rounded-full bg-blue-500 absolute clip-half opacity-80"></div>
-                 <div className="w-32 h-32 rounded-full bg-yellow-400 absolute top-0 right-0 shadow-lg flex items-center justify-center text-black font-black text-sm">20%</div>
-                 <div className="w-24 h-24 rounded-full bg-orange-500 absolute bottom-4 right-4 shadow-lg flex items-center justify-center text-white font-black text-sm border-4 border-[#1a1b2e]">10%</div>
-                 <div className="absolute left-8 text-white font-black text-3xl drop-shadow-md">70%</div>
+               <div className="relative w-48 h-48 flex items-center justify-center mb-8 drop-shadow-2xl">
+                 {/* Pure SVG Donut built natively */}
+                 <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
+                    <path className="text-white/5" strokeWidth="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path className="text-blue-500" strokeDasharray="70, 100" strokeWidth="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path className="text-yellow-400" strokeDasharray="20, 100" strokeDashoffset="-70" strokeWidth="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path className="text-orange-500" strokeDasharray="10, 100" strokeDashoffset="-90" strokeWidth="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                 </svg>
+                 
+                 {/* Floating Labels */}
+                 <div className="absolute top-2 right-2 bg-yellow-400/20 text-yellow-400 px-2 py-0.5 rounded-md backdrop-blur-sm font-black text-xs border border-yellow-400/30">20%</div>
+                 <div className="absolute bottom-6 right-6 bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-md backdrop-blur-sm font-black text-xs border border-orange-500/30">10%</div>
+                 <div className="absolute inset-0 flex items-center justify-center flex-col">
+                   <div className="text-white font-black text-3xl">70%</div>
+                   <div className="text-[10px] font-bold opacity-60 uppercase">Mobile</div>
+                 </div>
                </div>
                <div className="w-full space-y-4">
                  {[
@@ -377,10 +326,7 @@ export default function Dashboard() {
          <Widget className="col-span-2 flex flex-col overflow-hidden">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-black uppercase">Recent Customers</h3>
-              <button 
-                onClick={() => alert('Navigate to full Customers page')}
-                className="flex items-center gap-1 text-sm font-bold text-blue-400 hover:text-blue-300 hover:underline transition-all"
-              >
+              <button className="flex items-center gap-1 text-sm font-bold text-blue-400 hover:text-blue-300 hover:underline transition-all">
                  View All &rarr;
               </button>
             </div>
@@ -428,48 +374,13 @@ export default function Dashboard() {
             <div className="flex justify-between items-center mt-6 text-xs font-bold opacity-60">
                <div>Show <span className="bg-white/10 px-2 py-1 rounded-md border border-white/20">5</span> from {totalPages}</div>
                <div className="flex items-center gap-1">
-                 <button 
-                   onClick={() => handlePageChange(currentPage - 1)}
-                   disabled={currentPage === 1}
-                   className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${currentPage === 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10'}`}
-                 >
-                   &lt;
-                 </button>
-                 
+                 <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${currentPage === 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10'}`}>&lt;</button>
                  {[1, 2, 3].map(num => (
-                    <button 
-                      key={num}
-                      onClick={() => handlePageChange(num)}
-                      className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
-                        currentPage === num 
-                        ? 'bg-blue-500 text-white shadow-lg font-black border border-blue-400/50' 
-                        : 'hover:bg-white/10'
-                      }`}
-                    >
-                      {num}
-                    </button>
+                    <button key={num} onClick={() => handlePageChange(num)} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${currentPage === num ? 'bg-blue-500 text-white shadow-lg font-black border border-blue-400/50' : 'hover:bg-white/10'}`}>{num}</button>
                  ))}
-                 
                  <span className="px-1">...</span>
-                 
-                 <button 
-                   onClick={() => handlePageChange(totalPages)}
-                   className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
-                     currentPage === totalPages 
-                     ? 'bg-blue-500 text-white shadow-lg font-black border border-blue-400/50' 
-                     : 'hover:bg-white/10'
-                   }`}
-                 >
-                   {totalPages}
-                 </button>
-                 
-                 <button 
-                   onClick={() => handlePageChange(currentPage + 1)}
-                   disabled={currentPage === totalPages}
-                   className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${currentPage === totalPages ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10'}`}
-                 >
-                   &gt;
-                 </button>
+                 <button onClick={() => handlePageChange(totalPages)} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${currentPage === totalPages ? 'bg-blue-500 text-white shadow-lg font-black border border-blue-400/50' : 'hover:bg-white/10'}`}>{totalPages}</button>
+                 <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${currentPage === totalPages ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10'}`}>&gt;</button>
                </div>
             </div>
          </Widget>
