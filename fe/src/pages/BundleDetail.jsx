@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ExternalLink, Loader, Check, AlertCircle, Gift } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Loader2, Check, AlertCircle, Gift } from 'lucide-react';
 import { bundleAPI } from '../api/client';
 import RazorpayPaymentModal from '../components/RazorpayPaymentModal';
 
@@ -67,7 +67,7 @@ export default function BundleDetail() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader className="animate-spin text-blue-500" size={40} />
+        <Loader2 className="animate-spin text-blue-500" size={40} />
       </div>
     );
   }

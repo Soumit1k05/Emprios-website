@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingCart, Loader } from 'lucide-react';
+import { ShoppingCart, Loader2 } from 'lucide-react';
 import { bundleAPI } from '../api/client';
 
 export default function BundleList() {
@@ -26,7 +26,7 @@ export default function BundleList() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader className="animate-spin text-blue-500" size={40} />
+        <Loader2 className="animate-spin text-blue-500" size={40} />
       </div>
     );
   }
