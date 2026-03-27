@@ -40,13 +40,40 @@ export default function AccountPage({ onLogout }) {
   const { user, login, logout } = useAuth();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [saveMsg, setSaveMsg] = useState('');
+  const [saveType, setSaveType] = useState('success');
   const [form, setForm] = useState({
     name: user?.name || '',
     phone: user?.phone || '',
     company: user?.company || '',
     bio: user?.bio || '',
+    profilePic: user?.profilePic || '',
   });
+
+  // Fetch latest profile on mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user?.token) return;
+      try {
+        const res = await fetch('http://localhost:5000/api/auth/profile', {
+          headers: { Authorization: `Bearer ${user.token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          login({ ...data, token: user.token }); // update context
+          setForm({
+            name: data.name || '',
+            phone: data.phone || '',
+            company: data.company || '',
+            bio: data.bio || '',
+            profilePic: data.profilePic || '',
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const handleLogout = () => { logout(); onLogout(); };
 
@@ -55,6 +82,7 @@ export default function AccountPage({ onLogout }) {
   const handleSave = async () => {
     setSaving(true);
     setSaveMsg('');
+    setSaveType('success');
     try {
       const res = await fetch('http://localhost:5000/api/auth/profile', {
         method: 'PUT',
@@ -71,14 +99,17 @@ export default function AccountPage({ onLogout }) {
         setSaveMsg('Profile updated successfully.');
         setTimeout(() => setSaveMsg(''), 3000);
       } else {
+        setSaveType('error');
         setSaveMsg(data.message || 'Update failed.');
       }
     } catch {
+      setSaveType('error');
       setSaveMsg('Server error. Try again.');
     } finally {
       setSaving(false);
     }
   };
+
 
   return (
     <motion.div
@@ -171,10 +202,15 @@ export default function AccountPage({ onLogout }) {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="px-5 py-3 rounded-2xl bg-green-500/10 text-green-400 border border-green-500/20 text-xs font-bold"
+            className={`px-5 py-3 rounded-2xl border text-xs font-bold ${
+              saveType === 'success' 
+                ? 'bg-green-500/10 text-green-400 border-green-500/20' 
+                : 'bg-red-500/10 text-red-400 border-red-500/20'
+            }`}
           >
             {saveMsg}
           </motion.div>
+
         )}
       </AnimatePresence>
 

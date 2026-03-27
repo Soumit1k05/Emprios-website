@@ -3,59 +3,46 @@ import { motion } from 'framer-motion';
 import { Copy, Share2, TrendingUp, Users, Gift, ArrowUpRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { mockBundles } from '../api/mockData';
+import { useAuth } from '../context/AuthContext';
 
 
 export default function AffiliateDashboard() {
   const navigate = useNavigate();
-  const [affiliateCode, setAffiliateCode] = useState('');
+  const { user } = useAuth();
+  const [affiliateCode, setAffiliateCode] = useState(user?.affiliateCode || '');
   const [stats, setStats] = useState({
-    totalEarnings: 0,
-    totalSales: 0,
-    referralLink: '',
-    commissionRate: 10
+    totalEarnings: user?.earnings || 0,
+    totalSales: user?.referrals?.length || 0,
+    referralLink: `${window.location.origin}?ref=${user?.affiliateCode || ''}`,
+    commissionRate: 60, // Consistent with card UI
   });
-  const [affiliateStats, setAffiliateStats] = useState([]);
+  const [affiliateStats, setAffiliateStats] = useState(user?.payouts || []);
   const [copied, setCopied] = useState('');
   const [bundles, setBundles] = useState([]);
   const [selectedBundle, setSelectedBundle] = useState('all');
 
   useEffect(() => {
-    // Check if user is logged in, if not auto-create guest account
-    let userEmail = localStorage.getItem('userEmail');
-    if (!userEmail) {
-      const guestToken = `guest_${Date.now()}`;
-      localStorage.setItem('token', guestToken);
-      localStorage.setItem('userEmail', 'guest@emprios.com');
-      localStorage.setItem('userName', 'Guest Affiliate');
-      userEmail = 'guest@emprios.com';
+    // If not logged in, redirect
+    if (!user) {
+      navigate('/register');
+      return;
     }
 
-    // Generate or retrieve affiliate code
-    let code = localStorage.getItem('affiliateCode');
-    if (!code) {
-      code = `EMPRIOS${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-      localStorage.setItem('affiliateCode', code);
-    }
-    setAffiliateCode(code);
-
-    // Load affiliate stats
-    const stats = JSON.parse(localStorage.getItem('affiliateStats') || '[]');
-    setAffiliateStats(stats);
-
-    // Calculate total earnings
-    const total = stats.reduce((sum, stat) => sum + stat.totalEarnings, 0);
-    const totalSales = stats.reduce((sum, stat) => sum + stat.totalSales, 0);
-
+    setAffiliateCode(user.affiliateCode || '');
+    
     setStats({
-      totalEarnings: total,
-      totalSales: totalSales,
-      referralLink: `${window.location.origin}?ref=${code}`,
-      commissionRate: 10
+      totalEarnings: user.earnings || 0,
+      totalSales: user.referrals?.length || 0,
+      referralLink: `${window.location.origin}?ref=${user.affiliateCode || ''}`,
+      commissionRate: 60
     });
+
+    setAffiliateStats(user.payouts || []);
 
     // Load mock bundles for stats
     setBundles(mockBundles || []);
-  }, [affiliateCode]);
+  }, [user, navigate]);
+
 
 
   const copyToClipboard = (text, id) => {

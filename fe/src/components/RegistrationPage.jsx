@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Loader2, Phone } from 'lucide-react';
 import logo from '../assets/Empiros_Logo.jpeg';
 import { useAuth } from '../context/AuthContext';
 
@@ -10,6 +10,7 @@ export default function RegistrationPage() {
     name: '',
     email: '',
     password: '',
+    phone: '',
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -105,6 +106,23 @@ export default function RegistrationPage() {
               />
             </div>
           </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-slate-700 ml-1">Phone Number</label>
+            <div className="relative">
+              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <input
+                type="tel"
+                name="phone"
+                placeholder="+1 234 567 8900"
+                required
+                value={formData.phone}
+                onChange={handleChange}
+                className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              />
+            </div>
+          </div>
+
 
           <div className="space-y-2">
             <label className="text-sm font-semibold text-slate-700 ml-1">Password</label>

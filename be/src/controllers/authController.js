@@ -39,16 +39,22 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'Email already registered' });
     }
 
+    // Generate initial affiliate code
+    const baseCode = name.replace(/\s+/g, '').toUpperCase().slice(0, 6);
+    const affiliateCode = `${baseCode}${Math.floor(1000 + Math.random() * 9000)}`;
+
     const user = await User.create({
       name,
       email,
       password,
-      role,
+      role: role || 'affiliate',
       phone: phone || '',
       company: company || '',
       bio: bio || '',
+      affiliateCode,
       lastLogin: new Date(),
     });
+
 
     res.status(201).json(userResponse(user, generateToken(user._id, user.role)));
   } catch (error) {
