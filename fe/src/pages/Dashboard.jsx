@@ -7,7 +7,6 @@ const Widget = ({ children, className = '' }) => (
   </div>
 );
 
-// Small reusable dropdown component for the 3-dot menus
 const ActionMenu = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   return (
@@ -22,12 +21,39 @@ const ActionMenu = ({ isOpen, onClose }) => {
   );
 };
 
+// --- DYNAMIC DATA MAPPING ---
+// Colors and values update based on the selected timeline
+const chartDataMapping = {
+  '12 MONTHS': [
+    { label: 'Feb', val: 40, color: '#60a5fa' }, { label: 'Mar', val: 30, color: '#818cf8' }, 
+    { label: 'Apr', val: 60, color: '#a78bfa' }, { label: 'May', val: 50, color: '#c084fc' }, 
+    { label: 'Jun', val: 80, color: '#e879f9' }, { label: 'Jul', val: 45, color: '#f472b6' }, 
+    { label: 'Aug', val: 70, color: '#fb7185' }, { label: 'Sep', val: 90, color: '#f87171' }, 
+    { label: 'Oct', val: 65, color: '#fb923c' }, { label: 'Nov', val: 85, color: '#fbbf24' }, 
+    { label: 'Dec', val: 100, color: '#facc15' }, { label: 'Jan', val: 75, color: '#a3e635' }
+  ],
+  '6 MONTHS': [
+    { label: 'Aug', val: 35, color: '#fb7185' }, { label: 'Sep', val: 60, color: '#f87171' }, 
+    { label: 'Oct', val: 45, color: '#fb923c' }, { label: 'Nov', val: 75, color: '#fbbf24' }, 
+    { label: 'Dec', val: 95, color: '#facc15' }, { label: 'Jan', val: 80, color: '#a3e635' }
+  ],
+  '30 DAYS': [
+    { label: 'Wk 1', val: 60, color: '#34d399' }, { label: 'Wk 2', val: 45, color: '#2dd4bf' }, 
+    { label: 'Wk 3', val: 85, color: '#38bdf8' }, { label: 'Wk 4', val: 70, color: '#818cf8' }
+  ],
+  '7 DAYS': [
+    { label: 'Mon', val: 30, color: '#ef4444' }, { label: 'Tue', val: 50, color: '#f97316' }, 
+    { label: 'Wed', val: 75, color: '#f59e0b' }, { label: 'Thu', val: 40, color: '#84cc16' }, 
+    { label: 'Fri', val: 90, color: '#10b981' }, { label: 'Sat', val: 100, color: '#06b6d4' },
+    { label: 'Sun', val: 85, color: '#3b82f6' }
+  ]
+};
+
 export default function Dashboard() {
   const glassIcons = ['📱', '💻', '🎧', '⌚', '🎮'];
   
-  // States for interactive elements
   const [activeTimeFilter, setActiveTimeFilter] = useState('12 MONTHS');
-  const [chartType, setChartType] = useState('Area'); // 'Area', 'Bar', 'Donut'
+  const [chartType, setChartType] = useState('Area'); 
   const [isExporting, setIsExporting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -49,28 +75,40 @@ export default function Dashboard() {
 
   const toggleMenu = (id) => setOpenMenuId(openMenuId === id ? null : id);
 
-  // Raw mock data for native CSS/SVG rendering (Values represent percentages 0-100)
-  const mockChartData = [
-    { label: 'Feb', val: 40, color: '#60a5fa' }, { label: 'Mar', val: 30, color: '#818cf8' }, 
-    { label: 'Apr', val: 60, color: '#a78bfa' }, { label: 'May', val: 50, color: '#c084fc' }, 
-    { label: 'Jun', val: 80, color: '#e879f9' }, { label: 'Jul', val: 45, color: '#f472b6' }, 
-    { label: 'Aug', val: 70, color: '#fb7185' }, { label: 'Sep', val: 90, color: '#f87171' }, 
-    { label: 'Oct', val: 65, color: '#fb923c' }, { label: 'Nov', val: 85, color: '#fbbf24' }, 
-    { label: 'Dec', val: 100, color: '#facc15' }, { label: 'Jan', val: 75, color: '#a3e635' }
-  ];
+  // Get current data based on active filter
+  const currentChartData = chartDataMapping[activeTimeFilter];
 
-  // Renders the chart using pure HTML/CSS/SVG based on selection
+  // Helper function to build dynamic Area Chart SVG paths
+  const generateAreaPath = (data, isLineOnly = false) => {
+    const w = 100;
+    const h = 40;
+    const step = w / (data.length - 1);
+    
+    // Start drawing path
+    let path = isLineOnly 
+      ? `M0,${h - (data[0].val * 0.35)}` 
+      : `M0,${h} L0,${h - (data[0].val * 0.35)}`;
+
+    for (let i = 1; i < data.length; i++) {
+      const x = i * step;
+      const y = h - (data[i].val * 0.35); // 0.35 keeps it slightly below the top edge
+      path += ` L${x},${y}`;
+    }
+    
+    if (!isLineOnly) path += ` L${w},${h} Z`;
+    return path;
+  };
+
   const renderNativeChart = () => {
     if (chartType === 'Bar') {
       return (
         <div className="w-full h-full flex items-end justify-between gap-1 sm:gap-2 pt-4">
-          {mockChartData.map((d, i) => (
+          {currentChartData.map((d, i) => (
             <div key={i} className="flex-1 flex flex-col justify-end items-center h-full group relative">
               <div 
-                className="w-full bg-blue-500/40 hover:bg-blue-400 rounded-t-md transition-all duration-300 cursor-pointer"
-                style={{ height: `${d.val}%` }}
+                className="w-full rounded-t-md transition-all duration-500 cursor-pointer opacity-80 hover:opacity-100 shadow-[0_0_10px_rgba(255,255,255,0.1)]"
+                style={{ height: `${d.val}%`, backgroundColor: d.color }}
               ></div>
-              {/* Simple CSS Tooltip on Hover */}
               <div className="opacity-0 group-hover:opacity-100 absolute -top-8 bg-[#1a1b2e] border border-white/20 px-2 py-1 rounded text-xs font-bold transition-opacity whitespace-nowrap z-10 shadow-lg">
                 ${(d.val * 120).toLocaleString()}
               </div>
@@ -81,24 +119,27 @@ export default function Dashboard() {
     } 
     
     if (chartType === 'Donut') {
-      // Building a pure SVG Donut chart for the main sales area
+      const totalVal = currentChartData.reduce((sum, d) => sum + d.val, 0);
       let currentOffset = 0;
       return (
-        <div className="w-full h-full flex items-center justify-center">
-          <svg viewBox="0 0 36 36" className="w-48 h-48 sm:w-64 sm:h-64 transform -rotate-90 drop-shadow-2xl">
+        <div className="w-full h-full flex items-center justify-center p-2">
+          {/* Expanded viewBox (42x42) prevents stroke clipping */}
+          <svg viewBox="0 0 42 42" className="w-48 h-48 sm:w-64 sm:h-64 transform -rotate-90 drop-shadow-2xl overflow-visible">
             {/* Background Track */}
-            <path className="text-white/5" strokeWidth="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            <circle cx="21" cy="21" r="15.9155" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6" />
+            
             {/* Data Slices */}
-            {mockChartData.map((d, i) => {
-              const dashVal = (d.val / 800) * 100; // Scaling down so it forms a full circle
-              const dashStr = `${dashVal}, 100`;
-              const offsetStr = `-${currentOffset}`;
+            {currentChartData.map((d, i) => {
+              const dashVal = (d.val / totalVal) * 100;
+              const dashStr = `${dashVal} ${100 - dashVal}`;
+              const offsetStr = -currentOffset;
               currentOffset += dashVal;
               return (
-                <path 
-                  key={i} stroke={d.color} strokeWidth="4" strokeDasharray={dashStr} strokeDashoffset={offsetStr} fill="none" 
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                  className="transition-all duration-1000 hover:stroke-[5px] cursor-pointer"
+                <circle 
+                  key={i} cx="21" cy="21" r="15.9155" fill="none" 
+                  stroke={d.color} strokeWidth="6" 
+                  strokeDasharray={dashStr} strokeDashoffset={offsetStr}
+                  className="transition-all duration-1000 cursor-pointer hover:stroke-[8px]"
                 />
               );
             })}
@@ -107,19 +148,54 @@ export default function Dashboard() {
       );
     }
 
-    // Default: Area Chart (SVG)
+    // Area Chart (SVG)
     return (
       <svg viewBox="0 0 100 40" className="w-full h-full overflow-visible preserve-3d" preserveAspectRatio="none">
-        {/* Fill Area */}
-        <path d="M0,35 Q10,25 20,32 T40,20 T60,15 T80,10 T100,2 L100,40 L0,40 Z" fill="url(#gradient-blue)" className="transition-all duration-500" />
-        {/* Top Edge Line (styled to look like the edge of the area, not a line chart) */}
-        <path d="M0,35 Q10,25 20,32 T40,20 T60,15 T80,10 T100,2" fill="none" stroke="#60a5fa" strokeWidth="0.5" />
         <defs>
-          <linearGradient id="gradient-blue" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.4"/>
-            <stop offset="100%" stopColor="#60a5fa" stopOpacity="0"/>
+          <linearGradient id="dynamicGradient" x1="0" y1="0" x2="1" y2="0">
+            {currentChartData.map((d, i) => (
+              <stop key={i} offset={`${(i / (currentChartData.length - 1)) * 100}%`} stopColor={d.color} stopOpacity="0.5"/>
+            ))}
           </linearGradient>
+          <linearGradient id="fadeGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="white" stopOpacity="1"/>
+            <stop offset="100%" stopColor="white" stopOpacity="0"/>
+          </linearGradient>
+          <mask id="fadeMask">
+             <rect x="0" y="0" width="100" height="40" fill="url(#fadeGradient)" />
+          </mask>
         </defs>
+
+        {/* Fill Area */}
+        <path 
+          d={generateAreaPath(currentChartData, false)} 
+          fill="url(#dynamicGradient)" 
+          mask="url(#fadeMask)"
+          className="transition-all duration-700 ease-in-out" 
+        />
+        
+        {/* Top Edge Line */}
+        <path 
+          d={generateAreaPath(currentChartData, true)} 
+          fill="none" 
+          stroke={currentChartData[currentChartData.length - 1].color} 
+          strokeWidth="0.8" 
+          className="transition-all duration-700 ease-in-out drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]"
+        />
+        
+        {/* Data Dots on the line */}
+        {currentChartData.map((d, i) => (
+           <circle 
+             key={i} 
+             cx={i * (100 / (currentChartData.length - 1))} 
+             cy={40 - (d.val * 0.35)} 
+             r="1.5" 
+             fill="#1a1b2e" 
+             stroke={d.color} 
+             strokeWidth="0.5" 
+             className="transition-all duration-700 hover:r-[2.5]" 
+           />
+        ))}
       </svg>
     );
   };
@@ -190,7 +266,6 @@ export default function Dashboard() {
           <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-6">
             <div className="flex items-center gap-4">
               <h3 className="text-lg font-black uppercase">Sales Report</h3>
-              {/* Native Chart Type Selectors */}
               <div className="hidden sm:flex bg-white/5 border border-white/10 rounded-lg p-1 gap-1">
                 {[
                   { id: 'Area', icon: Activity },
@@ -245,7 +320,7 @@ export default function Dashboard() {
           </div>
           
           <div className="flex justify-between text-[11px] font-bold opacity-40 mt-4 px-2 uppercase tracking-widest">
-            {mockChartData.map(m => <span key={m.label}>{m.label}</span>)}
+            {currentChartData.map(m => <span key={m.label}>{m.label}</span>)}
           </div>
         </Widget>
 
@@ -280,7 +355,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-         {/* Native Pure SVG Donut Chart for Total Bets */}
+         {/* Total Bets (Donut Chart fixed with proper viewBox) */}
          <Widget className="flex flex-col relative">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-black uppercase">Total Bets</h3>
@@ -291,15 +366,13 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 flex flex-col items-center justify-center py-6">
                <div className="relative w-48 h-48 flex items-center justify-center mb-8 drop-shadow-2xl">
-                 {/* Pure SVG Donut built natively */}
-                 <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
-                    <path className="text-white/5" strokeWidth="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    <path className="text-blue-500" strokeDasharray="70, 100" strokeWidth="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    <path className="text-yellow-400" strokeDasharray="20, 100" strokeDashoffset="-70" strokeWidth="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    <path className="text-orange-500" strokeDasharray="10, 100" strokeDashoffset="-90" strokeWidth="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                 <svg viewBox="0 0 42 42" className="w-full h-full transform -rotate-90 overflow-visible">
+                    <circle cx="21" cy="21" r="15.9155" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6" />
+                    <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#3b82f6" strokeWidth="6" strokeDasharray="70 30" />
+                    <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#facc15" strokeWidth="6" strokeDasharray="20 80" strokeDashoffset="-70" />
+                    <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#f97316" strokeWidth="6" strokeDasharray="10 90" strokeDashoffset="-90" />
                  </svg>
                  
-                 {/* Floating Labels */}
                  <div className="absolute top-2 right-2 bg-yellow-400/20 text-yellow-400 px-2 py-0.5 rounded-md backdrop-blur-sm font-black text-xs border border-yellow-400/30">20%</div>
                  <div className="absolute bottom-6 right-6 bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-md backdrop-blur-sm font-black text-xs border border-orange-500/30">10%</div>
                  <div className="absolute inset-0 flex items-center justify-center flex-col">
