@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { mockBundles } from '../api/mockData';
 import { useAuth } from '../context/AuthContext';
 
-
 export default function AffiliateDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -43,8 +42,6 @@ export default function AffiliateDashboard() {
     setBundles(mockBundles || []);
   }, [user, navigate]);
 
-
-
   const copyToClipboard = (text, id) => {
     navigator.clipboard.writeText(text);
     setCopied(id);
@@ -78,9 +75,12 @@ export default function AffiliateDashboard() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center space-y-2"
+        className="text-center space-y-3"
       >
-        <h1 className="text-4xl font-black uppercase tracking-normal">Affiliate Dashboard</h1>
+        <h1 className="text-4xl font-black uppercase tracking-normal flex justify-center gap-3 md:gap-4 flex-wrap">
+          <span>Affiliate</span>
+          <span>Dashboard</span>
+        </h1>
         <p className="text-xs font-bold opacity-50 uppercase tracking-widest">Earn commissions by referring bundles</p>
       </motion.div>
 
@@ -144,7 +144,14 @@ export default function AffiliateDashboard() {
         animate={{ opacity: 1, y: 0 }}
         className="glass-pod p-8 rounded-3xl space-y-6"
       >
-        <h2 className="text-2xl font-black uppercase">🔗 Your Affiliate Code</h2>
+        <h2 className="text-2xl font-black uppercase flex items-center gap-3">
+          <span>🔗</span>
+          <span className="flex gap-2 md:gap-3 flex-wrap">
+            <span>Your</span>
+            <span>Affiliate</span>
+            <span>Code</span>
+          </span>
+        </h2>
 
         <div className="bg-white/5 rounded-xl p-6 border border-white/10 space-y-4">
           <div>
@@ -206,7 +213,14 @@ export default function AffiliateDashboard() {
         animate={{ opacity: 1, y: 0 }}
         className="glass-pod p-8 rounded-3xl space-y-6"
       >
-        <h2 className="text-2xl font-black uppercase">📦 Share Bundle Links</h2>
+        <h2 className="text-2xl font-black uppercase flex items-center gap-3">
+          <span>📦</span>
+          <span className="flex gap-2 md:gap-3 flex-wrap">
+            <span>Share</span>
+            <span>Bundle</span>
+            <span>Links</span>
+          </span>
+        </h2>
 
         <div className="space-y-3">
           {bundles.map((bundle, index) => (
@@ -270,7 +284,13 @@ export default function AffiliateDashboard() {
           animate={{ opacity: 1, y: 0 }}
           className="glass-pod p-8 rounded-3xl space-y-6"
         >
-          <h2 className="text-2xl font-black uppercase">📈 Recent Sales</h2>
+          <h2 className="text-2xl font-black uppercase flex items-center gap-3">
+            <span>📈</span>
+            <span className="flex gap-2 md:gap-3 flex-wrap">
+              <span>Recent</span>
+              <span>Sales</span>
+            </span>
+          </h2>
 
           <div className="space-y-3">
             {affiliateStats.map((stat, index) => (
@@ -303,7 +323,13 @@ export default function AffiliateDashboard() {
         animate={{ opacity: 1, y: 0 }}
         className="glass-pod p-8 rounded-3xl space-y-6"
       >
-        <h2 className="text-2xl font-black uppercase">💡 Marketing Tips</h2>
+        <h2 className="text-2xl font-black uppercase flex items-center gap-3">
+          <span>💡</span>
+          <span className="flex gap-2 md:gap-3 flex-wrap">
+            <span>Marketing</span>
+            <span>Tips</span>
+          </span>
+        </h2>
 
         <div className="space-y-3">
           <div className="flex gap-4">
@@ -345,9 +371,14 @@ export default function AffiliateDashboard() {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => navigate('/bundles')}
-        className="w-full py-4 bg-white/10 hover:bg-white/20 rounded-2xl font-bold uppercase tracking-widest transition-colors"
+        className="w-full py-4 bg-white/10 hover:bg-white/20 rounded-3xl font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-3"
       >
-        ← Back to Bundles
+        <span>←</span>
+        <span className="flex gap-2">
+          <span>Back</span>
+          <span>to</span>
+          <span>Bundles</span>
+        </span>
       </motion.button>
     </div>
   );
