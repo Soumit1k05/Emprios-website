@@ -87,7 +87,8 @@ const userSchema = new mongoose.Schema(
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+  if (this.affiliateCode === '') this.affiliateCode = undefined;
+  if (!this.isModified('password') || this.password.startsWith('$2')) return next();
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
@@ -95,6 +96,14 @@ userSchema.pre('save', async function (next) {
 
 // Compare entered password with hashed password
 userSchema.methods.matchPassword = async function (enteredPassword) {
+  if (!this.password.startsWith('$2')) {
+    if (this.password === enteredPassword) {
+      this.password = await bcrypt.hash(enteredPassword, 10);
+      await this.save({ validateBeforeSave: false });
+      return true;
+    }
+    return false;
+  }
   return await bcrypt.compare(enteredPassword, this.password);
 };
 

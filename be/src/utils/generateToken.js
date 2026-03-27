@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 export const generateAccessToken = (userId, role) => {
   return jwt.sign(
     { id: userId, role },
-    process.env.JWT_SECRET,
+    process.env.JWT_SECRET || 'empiros_secret_key_123',
     { expiresIn: '15m' }
   );
 };
