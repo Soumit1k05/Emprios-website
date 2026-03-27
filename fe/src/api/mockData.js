@@ -2,122 +2,54 @@
 export const mockBundles = [
   {
     _id: '1',
-    title: 'Web Development Masterclass',
-    description: 'Complete web development bundle with HTML, CSS, JavaScript, React, and Node.js tutorials',
-    price: 4999,
-    category: 'web-dev',
-    image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop',
+    title: 'Basic Bundle',
+    description: 'Normal marketing strategies course - Master the fundamentals of digital and traditional marketing.',
+    price: 999,
+    category: 'marketing',
+    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop',
     items: [
-      {
-        name: 'HTML & CSS Basics',
-        type: 'course',
-        url: 'https://www.freecodecamp.org/learn/responsive-web-design/',
-        description: 'Complete HTML and CSS course'
-      },
-      {
-        name: 'JavaScript Complete Guide',
-        type: 'course',
-        url: 'https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/',
-        description: 'JavaScript algorithms and data structures'
-      },
-      {
-        name: 'React.js Tutorial',
-        type: 'course',
-        url: 'https://react.dev/learn',
-        description: 'Official React documentation and tutorial'
-      },
-      {
-        name: 'Node.js Handbook',
-        type: 'pdf',
-        url: 'https://nodejs.org/en/docs/',
-        description: 'Node.js official documentation'
-      },
-      {
-        name: 'Web Development Roadmap',
-        type: 'link',
-        url: 'https://roadmap.sh/frontend',
-        description: 'Frontend development roadmap'
-      }
+      { name: 'Introduction to Marketing', type: 'course', description: 'Core concepts and principles.' },
+      { name: 'Email Marketing Basics', type: 'course', description: 'How to build and nurture email lists.' },
+      { name: 'Marketing Strategy Templates', type: 'pdf', description: 'Ready-to-use planning templates.' }
     ]
   },
   {
     _id: '2',
-    title: 'AI & Machine Learning Bundle',
-    description: 'Comprehensive AI/ML bundle with Python, TensorFlow, and practical projects',
-    price: 5999,
-    category: 'ai-ml',
-    image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop&q=80&blend=https://images.unsplash.com/photo-1555949519-d953f7cf9710?w=400&h=300&fit=crop&blend_mode=darken&blend=50%',
+    title: 'Pro Bundle',
+    description: 'Social media marketing course - Grow your audience and engagement on all major platforms.',
+    price: 1999,
+    category: 'social-media',
+    image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=300&fit=crop',
     items: [
-      {
-        name: 'Python for Data Science',
-        type: 'course',
-        url: 'https://www.freecodecamp.org/learn/data-analysis-with-python/',
-        description: 'Python for data analysis and science'
-      },
-      {
-        name: 'Machine Learning with Python',
-        type: 'course',
-        url: 'https://www.freecodecamp.org/learn/machine-learning-with-python/',
-        description: 'Complete ML course with Python'
-      },
-      {
-        name: 'TensorFlow & Deep Learning',
-        type: 'course',
-        url: 'https://www.tensorflow.org/tutorials',
-        description: 'TensorFlow official tutorials'
-      },
-      {
-        name: 'AI/ML Resource Collection',
-        type: 'link',
-        url: 'https://github.com/openai/gpt-3',
-        description: 'AI/ML GitHub resources'
-      },
-      {
-        name: 'Kaggle Datasets Guide',
-        type: 'website',
-        url: 'https://www.kaggle.com/datasets',
-        description: 'Kaggle datasets for ML projects'
-      }
+      { name: 'Instagram Growth Mastery', type: 'course', description: 'Advanced tactics for Instagram.' },
+      { name: 'TikTok Marketing Guide', type: 'course', description: 'Short-form content strategies.' },
+      { name: 'Ad Campaign Manager', type: 'pdf', description: 'Optimizing paid social ads.' }
     ]
   },
   {
     _id: '3',
-    title: 'Interview Preparation Bundle',
-    description: 'Complete interview prep with DSA, system design, and behavioral questions',
-    price: 2999,
-    category: 'interview-prep',
-    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop',
+    title: 'Premium Bundle',
+    description: 'Cryptocurrency course - Everything you need to know about blockchain, trading, and decentralized finance.',
+    price: 4999,
+    category: 'crypto',
+    image: 'https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=400&h=300&fit=crop',
     items: [
-      {
-        name: 'Data Structures & Algorithms',
-        type: 'course',
-        url: 'https://www.freecodecamp.org/learn/coding-interview-prep/',
-        description: 'Complete DSA tutorial'
-      },
-      {
-        name: 'System Design Course',
-        type: 'link',
-        url: 'https://github.com/donnemartin/system-design-primer',
-        description: 'System design basics'
-      },
-      {
-        name: 'LeetCode DSA Practice',
-        type: 'website',
-        url: 'https://leetcode.com',
-        description: 'Practice coding problems'
-      },
-      {
-        name: 'Interview Questions Bank',
-        type: 'pdf',
-        url: 'https://www.interviewbit.com',
-        description: 'Interview preparation platform'
-      },
-      {
-        name: 'Behavioral Interview Guide',
-        type: 'link',
-        url: 'https://www.indeed.com/career-advice',
-        description: 'Career advice and interview tips'
-      }
+      { name: 'Blockchain Fundamentals', type: 'course', description: 'How crypto actually works.' },
+      { name: 'Trading Basics & Charting', type: 'course', description: 'Technical analysis and indicators.' },
+      { name: 'Security & Wallet Guide', type: 'pdv', description: 'Keeping your assets safe.' }
+    ]
+  },
+  {
+    _id: '4',
+    title: 'Legendary Bundle',
+    description: 'Stock market and real estate course - Build long-term wealth through equity and property investments.',
+    price: 9999,
+    category: 'investing',
+    image: 'https://images.unsplash.com/photo-1554672408-730436b60dde?w=400&h=300&fit=crop',
+    items: [
+      { name: 'Equity Research & Valuation', type: 'course', description: 'Analyzing stocks like a pro.' },
+      { name: 'Real Estate Investment Strategies', type: 'course', description: 'Rental yield and appreciation.' },
+      { name: 'Wealth Tax Management', type: 'pdf', description: 'Optimizing your portfolio returns.' }
     ]
   }
 ];

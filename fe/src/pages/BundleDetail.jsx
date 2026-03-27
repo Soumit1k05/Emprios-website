@@ -97,60 +97,61 @@ export default function BundleDetail() {
         <ArrowLeft size={16} /> Back to Bundles
       </motion.button>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left side - Bundle Info */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="md:col-span-2 space-y-6"
+          className="lg:col-span-8 space-y-6"
         >
-          {/* Bundle Image */}
+          {/* Bundle Image / Hero */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full h-80 rounded-3xl overflow-hidden bg-gradient-to-br from-blue-500/20 to-purple-500/20 shadow-lg"
+            className="w-full aspect-video rounded-[3rem] overflow-hidden bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-4 border-white/50 relative group"
           >
             <img
               src={bundle.image}
               alt={bundle.title}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.parentElement.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
-              }}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
+            <div className="absolute inset-x-0 bottom-0 p-10 bg-gradient-to-t from-black/80 to-transparent flex flex-col gap-2">
+               <span className="px-4 py-1.5 rounded-full bg-blue-600/80 text-white text-[10px] font-black uppercase tracking-widest w-fit backdrop-blur-md">Full Bundle Pack</span>
+               <h1 className="text-4xl lg:text-5xl font-black text-white uppercase tracking-tighter leading-none italic">{bundle.title}</h1>
+            </div>
           </motion.div>
 
-          <div className="glass-pod p-8 rounded-3xl space-y-4">
-            <h1 className="text-4xl font-black uppercase tracking-tight">{bundle.title}</h1>
-            <p className="text-base opacity-70">{bundle.description}</p>
+          {/* Description */}
+          <div className="glass-pod p-10 rounded-[2.5rem] space-y-6">
+            <div className="flex items-center gap-4">
+               <div className="w-1.5 h-8 bg-blue-600 rounded-full" />
+               <h2 className="text-2xl font-black uppercase tracking-tighter italic">About this Bundle</h2>
+            </div>
+            <p className="text-lg opacity-80 leading-relaxed font-medium">{bundle.description}</p>
           </div>
 
-          <div className="glass-pod p-8 rounded-3xl space-y-4">
-            <h2 className="text-2xl font-black uppercase">📦 Included Items ({bundle.items.length})</h2>
-            <div className="space-y-3">
+          {/* Side-by-Side Preview (Contents) */}
+          <div className="glass-pod p-10 rounded-[2.5rem] space-y-8">
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="text-2xl font-black uppercase tracking-tighter italic flex items-center gap-3">
+                <span className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500"><Check size={20} /></span> Contents Breakdown
+              </h2>
+              <span className="text-xs font-black uppercase tracking-widest opacity-40">{bundle.items.length} Premium Modules</span>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {bundle.items.map((item, index) => (
-                <motion.a
+                <div
                   key={index}
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="flex items-start gap-4 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer"
+                  className="p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-3xl transition-all duration-300 group"
                 >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-sm">{item.name}</p>
-                      <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full">
-                        {item.type}
-                      </span>
-                    </div>
-                    <p className="text-xs opacity-60 mt-1">{item.description}</p>
-                  </div>
-                  <ExternalLink className="opacity-0 group-hover:opacity-100 transition-opacity" size={16} />
-                </motion.a>
+                   <div className="flex items-center justify-between mb-2">
+                     <span className="px-3 py-1 bg-blue-500/20 text-blue-400 text-[10px] font-black uppercase rounded-lg border border-blue-500/20">{item.type}</span>
+                     <span className="text-[10px] font-black opacity-30 italic">Module {index + 1}</span>
+                   </div>
+                   <h3 className="font-black text-lg mb-1">{item.name}</h3>
+                   <p className="text-xs opacity-60 line-clamp-2">{item.description}</p>
+                </div>
               ))}
             </div>
           </div>
@@ -160,8 +161,9 @@ export default function BundleDetail() {
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="md:col-span-1"
+          className="lg:col-span-4 sticky top-8"
         >
+
           <div className="glass-pod p-8 rounded-3xl space-y-6 sticky top-24">
             <div className="space-y-2">
               <p className="text-xs opacity-60 uppercase tracking-widest">Total Price</p>

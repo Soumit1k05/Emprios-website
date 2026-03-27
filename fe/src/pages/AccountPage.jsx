@@ -90,13 +90,39 @@ export default function AccountPage({ onLogout }) {
       {/* ── Profile Hero Card ── */}
       <div className="glass-pod p-8 flex flex-col sm:flex-row items-center sm:items-start gap-6">
         {/* Avatar */}
-        <div className="relative shrink-0">
-          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white text-4xl font-black shadow-xl shadow-blue-500/30">
-            {user?.name?.charAt(0).toUpperCase()}
+        <div className="relative shrink-0 group cursor-pointer" onClick={() => editing && document.getElementById('avatar-input').click()}>
+          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 overflow-hidden text-white text-4xl font-black shadow-xl shadow-blue-500/30 flex items-center justify-center relative">
+            {user?.profilePic ? (
+              <img src={user.profilePic} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              user?.name?.charAt(0).toUpperCase()
+            )}
+            
+            {editing && (
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Pencil size={20} className="text-white" />
+              </div>
+            )}
           </div>
           {user?.isActive && (
             <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white/20" title="Active" />
           )}
+          <input 
+            id="avatar-input"
+            type="file" 
+            className="hidden" 
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  setForm({ ...form, profilePic: reader.result });
+                };
+                reader.readAsDataURL(file);
+              }
+            }}
+          />
         </div>
 
         {/* Name + meta */}
@@ -129,13 +155,14 @@ export default function AccountPage({ onLogout }) {
 
         {/* Edit button */}
         <button
-          onClick={() => { setEditing(!editing); setSaveMsg(''); }}
+          onClick={() => { setEditing(!editing); setSaveMsg(''); setForm({ ...form, profilePic: user?.profilePic || '' }); }}
           className="shrink-0 w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all"
           title={editing ? 'Cancel' : 'Edit Profile'}
         >
           {editing ? <X size={16} /> : <Pencil size={16} />}
         </button>
       </div>
+
 
       {/* ── Save message ── */}
       <AnimatePresence>

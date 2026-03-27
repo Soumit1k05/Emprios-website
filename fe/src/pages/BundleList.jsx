@@ -42,7 +42,8 @@ export default function BundleList() {
         <p className="text-xs font-bold opacity-50 uppercase tracking-widest">Curated collections of resources • Instant access • Lifetime validity</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pb-10">
+
         {bundles.map((bundle, index) => (
           <motion.div
             key={bundle._id}
@@ -97,6 +98,27 @@ export default function BundleList() {
           </button>
         </div>
       )}
+
+      {/* Affiliate Partner Program CTA */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true }}
+        className="glass-pod p-10 mt-12 mb-12 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 border border-blue-500/20 text-center relative overflow-hidden group"
+      >
+        <div className="absolute top-0 right-0 p-8 opacity-20 group-hover:scale-110 transition-transform duration-500">
+           <Zap className="text-blue-500" size={80} />
+        </div>
+        <h3 className="text-3xl font-black uppercase italic tracking-tighter mb-4 relative z-10">Want to earn while you learn?</h3>
+        <p className="text-sm font-bold opacity-60 max-w-lg mx-auto mb-8 uppercase tracking-widest leading-relaxed relative z-10">Join our partner ecosystem and earn <span className="text-blue-500">60% commission</span> for every successful referral.</p>
+        <button
+          onClick={() => window.location.href = '/affiliate'}
+          className="px-12 py-5 bg-blue-600 text-white rounded-3xl font-black uppercase tracking-widest hover:bg-blue-700 hover:scale-105 transition-all shadow-xl shadow-blue-500/30 relative z-10"
+        >
+          Become an Affiliate Partner
+        </button>
+      </motion.div>
+
     </div>
   );
 }

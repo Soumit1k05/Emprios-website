@@ -9,7 +9,10 @@ import BundleList from './pages/BundleList';
 import BundleDetail from './pages/BundleDetail';
 import BundleSuccess from './pages/BundleSuccess';
 import AffiliateDashboardPage from './pages/AffiliateDashboardPage';
+import AccountPage from './pages/AccountPage';
+import RegistrationPage from './components/RegistrationPage';
 import './App.css';
+
 
 const NavItem = ({ children, active, onClick }) => (
   <button 
@@ -76,7 +79,8 @@ function AppContent() {
   };
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center p-2 lg:p-8 overflow-hidden relative">
+    <div className="w-full min-h-screen flex flex-col items-center p-2 lg:p-8 relative">
+
       <div className="bg-blobs">
         <div className="blob blob-1" />
         <div className="blob blob-2" />
@@ -84,7 +88,8 @@ function AppContent() {
         <div className="blob blob-4" />
       </div>
 
-      <motion.div layout className="hub-main w-full max-h-[95vh] flex flex-col">
+      <motion.div layout className="hub-main w-full max-w-7xl flex flex-col min-h-[95vh]">
+
         {/* Header */}
         <header className="h-[75px] px-8 flex items-center justify-between border-b border-white/10 shrink-0">
           <div className="flex items-center gap-6">
@@ -102,7 +107,8 @@ function AppContent() {
             <NavItem active={location.pathname === '/bundles'} onClick={() => navigate('/bundles')}>Bundles</NavItem>
             <NavItem active={location.pathname === '/affiliate'} onClick={() => navigate('/affiliate')}>Affiliate</NavItem>
             <NavItem active={location.pathname === '/dashboard'} onClick={() => navigate('/dashboard')}>Dashboard</NavItem>
-            <NavItem onClick={() => alert('Account section coming soon!')}>Account</NavItem>
+            <NavItem active={location.pathname === '/account'} onClick={() => navigate('/account')}>Account</NavItem>
+
           </nav>
 
           <div className="flex items-center gap-2">
@@ -115,7 +121,8 @@ function AppContent() {
         </header>
 
         {/* Dynamic Content */}
-        <main className="flex-1 p-6 lg:p-12 custom-scroll overflow-y-auto">
+        <main className="flex-1 p-6 lg:p-12">
+
           <AnimatePresence mode="wait">
             <Routes>
               <Route path="/" element={
@@ -164,20 +171,33 @@ function AppContent() {
 
               <Route path="/dashboard" element={
                 <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">
-                  <div className="glass-pod p-10 h-[500px] flex items-center justify-center relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 group-hover:opacity-100 transition-opacity" />
+                  <div className="glass-pod p-10 min-h-[500px] flex items-center justify-center relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 group-hover:opacity-100 transition-opacity" />
                     <div className="text-center space-y-4 relative z-10">
                       <div className="w-20 h-20 rounded-3xl bg-blue-600/10 flex items-center justify-center mx-auto mb-6">
                          <Zap className="text-blue-500" size={40} />
                       </div>
-                      <h3 className="text-2xl font-black uppercase italic">Prototype Mode Active.</h3>
-                      <p className="text-[11px] font-bold opacity-50 max-w-xs mx-auto">This represents the live scaling environment of Empiros. All nodes are ready for deployment.</p>
-                      <button onClick={() => navigate('/')} className="text-[10px] font-black uppercase tracking-widest text-blue-500 border-b-2 border-blue-500 pb-1">Exit Prototype</button>
+                      <h3 className="text-3xl font-black uppercase italic tracking-tighter">Prototype Mode Active</h3>
+                      <p className="text-sm font-bold opacity-60 max-w-xs mx-auto">This represents the live scaling environment of Empiros. All nodes are ready for deployment.</p>
+                      <button onClick={() => navigate('/')} className="px-6 py-2 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">Back to Home</button>
                     </div>
                   </div>
                 </motion.div>
               } />
+
+              <Route path="/account" element={
+                <motion.div key="account" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <AccountPage onLogout={() => navigate('/')} />
+                </motion.div>
+              } />
+
+              <Route path="/register" element={
+                <motion.div key="register" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <RegistrationPage />
+                </motion.div>
+              } />
             </Routes>
+
           </AnimatePresence>
         </main>
 

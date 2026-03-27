@@ -125,18 +125,35 @@ export default function BundleSuccess() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-pod p-8 rounded-3xl space-y-4"
+        className="glass-pod p-8 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6"
       >
-        <h2 className="text-3xl font-black uppercase">
-          {bundleData.bundleTitle}
-        </h2>
-
-        <div className="flex gap-4 text-sm opacity-60">
-          <span>✓ Purchased on {new Date(bundleData.purchaseDate).toLocaleDateString()}</span>
-          <span>✓ Lifetime access</span>
-          <span>✓ No expiry</span>
+        <div className="space-y-2 text-center md:text-left">
+          <h2 className="text-3xl font-black uppercase tracking-tighter">
+            {bundleData.bundleTitle}
+          </h2>
+          <div className="flex flex-wrap justify-center md:justify-start gap-4 text-xs opacity-60 font-black uppercase tracking-widest">
+            <span>✓ Purchased on {new Date(bundleData.purchaseDate).toLocaleDateString()}</span>
+            <span>✓ Lifetime access</span>
+            <span>✓ Direct ZIP Download</span>
+          </div>
         </div>
+
+        <button
+          onClick={() => {
+            const link = document.createElement('a');
+            link.href = 'https://github.com/Soumit1k05/Emprios-website/archive/refs/heads/main.zip'; // Using repo zip as fallback
+            link.download = `${bundleData.bundleTitle.replace(/\s+/g, '_')}_Bundle.zip`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            alert('Your bundle download has started!');
+          }}
+          className="px-8 py-4 bg-green-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-green-700 hover:scale-105 transition-all shadow-xl shadow-green-500/20 flex items-center gap-3 shrink-0"
+        >
+          <ExternalLink size={18} /> Download Full Bundle (ZIP)
+        </button>
       </motion.div>
+
 
       {/* Resources */}
       <motion.div

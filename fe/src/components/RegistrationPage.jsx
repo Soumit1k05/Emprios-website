@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User, ArrowRight, Loader2 } from 'lucide-react';
 import logo from '../assets/Empiros_Logo.jpeg';
+import { useAuth } from '../context/AuthContext';
+
 
 export default function RegistrationPage() {
   const [formData, setFormData] = useState({
@@ -16,13 +18,14 @@ export default function RegistrationPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const { login } = useAuth();
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage({ type: '', text: '' });
 
     try {
-      const response = await fetch('http://localhost:5000/api/register', {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -34,10 +37,15 @@ export default function RegistrationPage() {
 
       if (response.ok) {
         setMessage({ type: 'success', text: 'Registration successful! Welcome to Empiros.' });
-        setFormData({ name: '', email: '', password: '' });
+        login(data);
+        setTimeout(() => {
+          window.location.href = '/account';
+        }, 1500);
       } else {
         setMessage({ type: 'error', text: data.message || 'Registration failed. Please try again.' });
       }
+
+
     } catch (error) {
       setMessage({ type: 'error', text: 'Server error. Please check if the backend is running.' });
     } finally {

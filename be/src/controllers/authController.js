@@ -13,7 +13,9 @@ const userResponse = (user, token) => ({
   isActive: user.isActive,
   lastLogin: user.lastLogin,
   createdAt: user.createdAt,
+  profilePic: user.profilePic,
   affiliateCode: user.affiliateCode,
+
   referrals: user.referrals,
   earnings: user.earnings,
   payouts: user.payouts,
@@ -110,10 +112,12 @@ export const updateUserProfile = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    user.name    = req.body.name    ?? user.name;
-    user.phone   = req.body.phone   ?? user.phone;
-    user.company = req.body.company ?? user.company;
-    user.bio     = req.body.bio     ?? user.bio;
+    user.name       = req.body.name       ?? user.name;
+    user.phone      = req.body.phone      ?? user.phone;
+    user.company    = req.body.company    ?? user.company;
+    user.bio        = req.body.bio        ?? user.bio;
+    user.profilePic = req.body.profilePic ?? user.profilePic;
+
 
     // Only update password if provided
     if (req.body.password) {
