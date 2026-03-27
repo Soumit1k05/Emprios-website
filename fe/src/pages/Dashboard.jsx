@@ -22,7 +22,6 @@ const ActionMenu = ({ isOpen, onClose }) => {
 };
 
 // --- DYNAMIC DATA MAPPING ---
-// Colors and values update based on the selected timeline
 const chartDataMapping = {
   '12 MONTHS': [
     { label: 'Feb', val: 40, color: '#60a5fa' }, { label: 'Mar', val: 30, color: '#818cf8' }, 
@@ -75,23 +74,20 @@ export default function Dashboard() {
 
   const toggleMenu = (id) => setOpenMenuId(openMenuId === id ? null : id);
 
-  // Get current data based on active filter
   const currentChartData = chartDataMapping[activeTimeFilter];
 
-  // Helper function to build dynamic Area Chart SVG paths
   const generateAreaPath = (data, isLineOnly = false) => {
     const w = 100;
     const h = 40;
     const step = w / (data.length - 1);
     
-    // Start drawing path
     let path = isLineOnly 
       ? `M0,${h - (data[0].val * 0.35)}` 
       : `M0,${h} L0,${h - (data[0].val * 0.35)}`;
 
     for (let i = 1; i < data.length; i++) {
       const x = i * step;
-      const y = h - (data[i].val * 0.35); // 0.35 keeps it slightly below the top edge
+      const y = h - (data[i].val * 0.35);
       path += ` L${x},${y}`;
     }
     
@@ -123,10 +119,12 @@ export default function Dashboard() {
       let currentOffset = 0;
       return (
         <div className="w-full h-full flex items-center justify-center p-2">
-          {/* Expanded viewBox (42x42) prevents stroke clipping */}
-          <svg viewBox="0 0 42 42" className="w-48 h-48 sm:w-64 sm:h-64 transform -rotate-90 drop-shadow-2xl overflow-visible">
+          {/* FIX: Increased viewBox to 50 50, cx/cy to 25. 
+            Added max-h-full to prevent the SVG from pushing out of the container boundaries. 
+          */}
+          <svg viewBox="0 0 50 50" className="max-h-full w-full max-w-[16rem] transform -rotate-90 drop-shadow-2xl overflow-visible">
             {/* Background Track */}
-            <circle cx="21" cy="21" r="15.9155" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6" />
+            <circle cx="25" cy="25" r="15.9155" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
             
             {/* Data Slices */}
             {currentChartData.map((d, i) => {
@@ -136,10 +134,10 @@ export default function Dashboard() {
               currentOffset += dashVal;
               return (
                 <circle 
-                  key={i} cx="21" cy="21" r="15.9155" fill="none" 
-                  stroke={d.color} strokeWidth="6" 
+                  key={i} cx="25" cy="25" r="15.9155" fill="none" 
+                  stroke={d.color} strokeWidth="8" 
                   strokeDasharray={dashStr} strokeDashoffset={offsetStr}
-                  className="transition-all duration-1000 cursor-pointer hover:stroke-[8px]"
+                  className="transition-all duration-1000 cursor-pointer hover:stroke-[10px]"
                 />
               );
             })}
@@ -150,53 +148,50 @@ export default function Dashboard() {
 
     // Area Chart (SVG)
     return (
-      <svg viewBox="0 0 100 40" className="w-full h-full overflow-visible preserve-3d" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="dynamicGradient" x1="0" y1="0" x2="1" y2="0">
-            {currentChartData.map((d, i) => (
-              <stop key={i} offset={`${(i / (currentChartData.length - 1)) * 100}%`} stopColor={d.color} stopOpacity="0.5"/>
-            ))}
-          </linearGradient>
-          <linearGradient id="fadeGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="white" stopOpacity="1"/>
-            <stop offset="100%" stopColor="white" stopOpacity="0"/>
-          </linearGradient>
-          <mask id="fadeMask">
-             <rect x="0" y="0" width="100" height="40" fill="url(#fadeGradient)" />
-          </mask>
-        </defs>
+      <div className="w-full h-full flex items-end">
+        <svg viewBox="0 0 100 40" className="w-full h-full overflow-visible preserve-3d" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="dynamicGradient" x1="0" y1="0" x2="1" y2="0">
+              {currentChartData.map((d, i) => (
+                <stop key={i} offset={`${(i / (currentChartData.length - 1)) * 100}%`} stopColor={d.color} stopOpacity="0.5"/>
+              ))}
+            </linearGradient>
+            <linearGradient id="fadeGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="white" stopOpacity="1"/>
+              <stop offset="100%" stopColor="white" stopOpacity="0"/>
+            </linearGradient>
+            <mask id="fadeMask">
+              <rect x="0" y="0" width="100" height="40" fill="url(#fadeGradient)" />
+            </mask>
+          </defs>
 
-        {/* Fill Area */}
-        <path 
-          d={generateAreaPath(currentChartData, false)} 
-          fill="url(#dynamicGradient)" 
-          mask="url(#fadeMask)"
-          className="transition-all duration-700 ease-in-out" 
-        />
-        
-        {/* Top Edge Line */}
-        <path 
-          d={generateAreaPath(currentChartData, true)} 
-          fill="none" 
-          stroke={currentChartData[currentChartData.length - 1].color} 
-          strokeWidth="0.8" 
-          className="transition-all duration-700 ease-in-out drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]"
-        />
-        
-        {/* Data Dots on the line */}
-        {currentChartData.map((d, i) => (
-           <circle 
-             key={i} 
-             cx={i * (100 / (currentChartData.length - 1))} 
-             cy={40 - (d.val * 0.35)} 
-             r="1.5" 
-             fill="#1a1b2e" 
-             stroke={d.color} 
-             strokeWidth="0.5" 
-             className="transition-all duration-700 hover:r-[2.5]" 
-           />
-        ))}
-      </svg>
+          <path 
+            d={generateAreaPath(currentChartData, false)} 
+            fill="url(#dynamicGradient)" 
+            mask="url(#fadeMask)"
+            className="transition-all duration-700 ease-in-out" 
+          />
+          <path 
+            d={generateAreaPath(currentChartData, true)} 
+            fill="none" 
+            stroke={currentChartData[currentChartData.length - 1].color} 
+            strokeWidth="0.8" 
+            className="transition-all duration-700 ease-in-out drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]"
+          />
+          {currentChartData.map((d, i) => (
+            <circle 
+              key={i} 
+              cx={i * (100 / (currentChartData.length - 1))} 
+              cy={40 - (d.val * 0.35)} 
+              r="1.5" 
+              fill="#1a1b2e" 
+              stroke={d.color} 
+              strokeWidth="0.5" 
+              className="transition-all duration-700 hover:r-[2.5]" 
+            />
+          ))}
+        </svg>
+      </div>
     );
   };
 
@@ -315,7 +310,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="flex-1 w-full flex items-end relative overflow-hidden mt-2">
+          {/* FIX: Removed overflow-hidden from here, allowing flex children to control their alignment without getting sliced */}
+          <div className="flex-1 w-full relative mt-2">
             {renderNativeChart()}
           </div>
           
@@ -355,7 +351,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-         {/* Total Bets (Donut Chart fixed with proper viewBox) */}
+         {/* Total Bets (Donut Chart applied same fixes) */}
          <Widget className="flex flex-col relative">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-black uppercase">Total Bets</h3>
@@ -366,11 +362,12 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 flex flex-col items-center justify-center py-6">
                <div className="relative w-48 h-48 flex items-center justify-center mb-8 drop-shadow-2xl">
-                 <svg viewBox="0 0 42 42" className="w-full h-full transform -rotate-90 overflow-visible">
-                    <circle cx="21" cy="21" r="15.9155" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6" />
-                    <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#3b82f6" strokeWidth="6" strokeDasharray="70 30" />
-                    <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#facc15" strokeWidth="6" strokeDasharray="20 80" strokeDashoffset="-70" />
-                    <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#f97316" strokeWidth="6" strokeDasharray="10 90" strokeDashoffset="-90" />
+                 {/* FIX: Adjusted viewBox here as well to match */}
+                 <svg viewBox="0 0 50 50" className="w-full h-full transform -rotate-90 overflow-visible">
+                    <circle cx="25" cy="25" r="15.9155" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
+                    <circle cx="25" cy="25" r="15.9155" fill="none" stroke="#3b82f6" strokeWidth="8" strokeDasharray="70 30" />
+                    <circle cx="25" cy="25" r="15.9155" fill="none" stroke="#facc15" strokeWidth="8" strokeDasharray="20 80" strokeDashoffset="-70" />
+                    <circle cx="25" cy="25" r="15.9155" fill="none" stroke="#f97316" strokeWidth="8" strokeDasharray="10 90" strokeDashoffset="-90" />
                  </svg>
                  
                  <div className="absolute top-2 right-2 bg-yellow-400/20 text-yellow-400 px-2 py-0.5 rounded-md backdrop-blur-sm font-black text-xs border border-yellow-400/30">20%</div>
