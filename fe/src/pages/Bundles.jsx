@@ -40,7 +40,7 @@ export default function Bundles() {
             </div>
 
             <div className="flex items-baseline gap-1 mb-8">
-              <span className="text-5xl font-black text-slate-800 tracking-tighter">{bundle.price}</span>
+              <span className="text-5xl font-black text-slate-800 tracking-normal">{bundle.price}</span>
               <span className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">/mo</span>
             </div>
 

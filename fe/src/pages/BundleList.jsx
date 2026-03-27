@@ -1,9 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingCart, Zap, Loader2 } from 'lucide-react';
+import { ShoppingCart, Zap, Loader2, Megaphone, Share2, Bitcoin, LineChart, Package } from 'lucide-react';
 import { bundleAPI } from '../api/client';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+
+const BundleIcon = ({ category }) => {
+  const getIcon = () => {
+    switch (category) {
+      case 'marketing': return <Megaphone strokeWidth={1.5} size={48} className="text-blue-500 drop-shadow-md" />;
+      case 'social-media': return <Share2 strokeWidth={1.5} size={48} className="text-purple-500 drop-shadow-md" />;
+      case 'crypto': return <Bitcoin strokeWidth={1.5} size={48} className="text-amber-500 drop-shadow-md" />;
+      case 'investing': return <LineChart strokeWidth={1.5} size={48} className="text-green-500 drop-shadow-md" />;
+      default: return <Package strokeWidth={1.5} size={48} className="text-white drop-shadow-md" />;
+    }
+  };
+
+  return (
+    <div className="w-full h-full relative overflow-hidden bg-gradient-to-br from-white/5 to-transparent backdrop-blur-2xl flex items-center justify-center group-hover:bg-white/10 transition-colors">
+      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent"></div>
+      <div className="relative z-10 w-20 h-20 rounded-[1.5rem] bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_8px_20px_rgba(0,0,0,0.15)] group-hover:scale-110 transition-transform duration-500">
+        {getIcon()}
+      </div>
+    </div>
+  );
+};
 
 export default function BundleList() {
   const [bundles, setBundle] = useState([]);
@@ -59,7 +80,7 @@ export default function BundleList() {
   return (
     <div className="space-y-8">
       <div className="text-center space-y-2">
-        <h2 className="text-4xl font-black uppercase tracking-tighter">Our Bundles</h2>
+        <h2 className="text-4xl font-black uppercase tracking-normal">Our Bundles</h2>
         <p className="text-xs font-bold opacity-50 uppercase tracking-widest">Curated collections of resources • Instant access • Lifetime validity</p>
       </div>
 
@@ -74,16 +95,8 @@ export default function BundleList() {
             className="glass-pod p-8 rounded-3xl flex flex-col gap-6 hover:shadow-2xl transition-shadow group cursor-pointer"
             onClick={() => window.location.href = `/bundle/${bundle._id}`}
           >
-            <div className="w-full h-40 rounded-xl overflow-hidden bg-gradient-to-br from-blue-500/20 to-purple-500/20 group-hover:scale-105 transition-transform flex items-center justify-center">
-              <img
-                src={bundle.image}
-                alt={bundle.title}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.parentElement.innerHTML = '<div class="w-full h-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center"><span class="text-xs opacity-50">Image unavailable</span></div>';
-                }}
-              />
+            <div className="w-full h-40 rounded-xl overflow-hidden bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-white/5 flex items-center justify-center">
+              <BundleIcon category={bundle.category} />
             </div>
 
             <div className="space-y-2">
@@ -130,7 +143,7 @@ export default function BundleList() {
         <div className="absolute top-0 right-0 p-8 opacity-20 group-hover:scale-110 transition-transform duration-500">
            <Zap className="text-blue-500" size={80} />
         </div>
-        <h3 className="text-3xl font-black uppercase tracking-tighter mb-4 relative z-10">Want to earn while you learn?</h3>
+        <h3 className="text-3xl font-black uppercase tracking-normal mb-4 relative z-10">Want to earn while you learn?</h3>
         <p className="text-sm font-bold opacity-60 max-w-lg mx-auto mb-8 uppercase tracking-widest leading-relaxed relative z-10">Join our partner ecosystem and earn <span className="text-blue-500">60% commission</span> for every successful referral.</p>
         <button
           onClick={() => window.location.href = '/affiliate'}

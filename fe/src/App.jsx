@@ -52,7 +52,7 @@ const BundleCard = ({ name, price, features, popular }) => (
   >
     {popular && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Most Popular</div>}
     <div className="space-y-1">
-      <h3 className="text-xl font-black uppercase tracking-tighter">{name}</h3>
+      <h3 className="text-xl font-black uppercase tracking-normal">{name}</h3>
       <div className="text-3xl font-black">{price}<span className="text-xs opacity-40 font-bold">/mo</span></div>
     </div>
     <ul className="space-y-3 flex-1">
@@ -152,7 +152,7 @@ export default function App() {
                 <motion.div key="home" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-12">
                   <div className="rounded-[45px] glass-pod text-center p-12 lg:p-20 max-w-2xl mx-auto backdrop-blur-3x">
                     <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="inline-block px-4 py-1 rounded-full bg-blue-500/10 text-red-500 text-[9px] font-black uppercase tracking-[0.2em] mb-6">Introducing Empiros</motion.div>
-                    <h1 className="text-4xl lg:text-6xl font-black mb-6 leading-tight tracking-tighter">EMPIROS</h1>
+                    <h1 className="text-4xl lg:text-6xl font-black mb-6 leading-tight tracking-normal">EMPIROS</h1>
                     <p className="text-sm lg:text-lg font-bold mb-10 opacity-70 tracking-tight lowercase">Build your network today</p>
                     <div className="flex flex-wrap justify-center gap-4">
                       <button onClick={() => navigate('/bundles')} className="px-10 py-5 bg-green-600 text-white rounded-3xl text-[10px] font-black uppercase tracking-widest shadow-2xl shadow-blue-500/40 hover:scale-105 transition-transform">Get Started</button>
@@ -170,7 +170,7 @@ export default function App() {
                   {/* Why Join Us Section */}
                   <div className="mt-20 glass-pod p-8 lg:p-16 space-y-10">
                     <div className="text-left space-y-3">
-                      <h2 className="text-3xl lg:text-4xl font-black tracking-tighter uppercase">Why Choose Empiros?</h2>
+                      <h2 className="text-3xl lg:text-4xl font-black tracking-normal uppercase">Why Choose Empiros?</h2>
                       <p className="text-sm opacity-50 font-bold uppercase tracking-widest">The ecosystem built for modern digital marketers.</p>
                     </div>
                     

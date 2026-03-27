@@ -80,7 +80,7 @@ export default function AffiliateDashboard() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center space-y-2"
       >
-        <h1 className="text-4xl font-black uppercase tracking-tighter">Affiliate Dashboard</h1>
+        <h1 className="text-4xl font-black uppercase tracking-normal">Affiliate Dashboard</h1>
         <p className="text-xs font-bold opacity-50 uppercase tracking-widest">Earn commissions by referring bundles</p>
       </motion.div>
 

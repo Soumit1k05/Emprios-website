@@ -1,7 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ExternalLink, Loader2, Check, AlertCircle, Gift } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Loader2, Check, AlertCircle, Gift, Megaphone, Share2, Bitcoin, LineChart, Package } from 'lucide-react';
+
+const BundleIcon = ({ category }) => {
+  const getIcon = () => {
+    switch (category) {
+      case 'marketing': return <Megaphone strokeWidth={1.5} size={64} className="text-blue-500 drop-shadow-md" />;
+      case 'social-media': return <Share2 strokeWidth={1.5} size={64} className="text-purple-500 drop-shadow-md" />;
+      case 'crypto': return <Bitcoin strokeWidth={1.5} size={64} className="text-amber-500 drop-shadow-md" />;
+      case 'investing': return <LineChart strokeWidth={1.5} size={64} className="text-green-500 drop-shadow-md" />;
+      default: return <Package strokeWidth={1.5} size={64} className="text-white drop-shadow-md" />;
+    }
+  };
+
+  return (
+    <div className="w-full h-full relative overflow-hidden bg-gradient-to-br from-white/5 to-transparent backdrop-blur-2xl flex items-center justify-center hover:bg-white/10 transition-colors duration-500">
+      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent"></div>
+      <div className="relative z-10 w-32 h-32 rounded-[2rem] bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_8px_32px_rgba(0,0,0,0.2)] group-hover:scale-110 transition-transform duration-500">
+        {getIcon()}
+      </div>
+    </div>
+  );
+};
 import { bundleAPI } from '../api/client';
 import RazorpayPaymentModal from '../components/RazorpayPaymentModal';
 
@@ -108,16 +129,12 @@ export default function BundleDetail() {
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full aspect-video rounded-[3rem] overflow-hidden bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-4 border-white/50 relative group"
+            className="w-full aspect-video rounded-[3rem] overflow-hidden bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-4 border-white/50 relative group flex items-center justify-center"
           >
-            <img
-              src={bundle.image}
-              alt={bundle.title}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
+            <BundleIcon category={bundle.category} />
             <div className="absolute inset-x-0 bottom-0 p-10 bg-gradient-to-t from-black/80 to-transparent flex flex-col gap-2">
                <span className="px-4 py-1.5 rounded-full bg-blue-600/80 text-white text-[10px] font-black uppercase tracking-widest w-fit backdrop-blur-md">Full Bundle Pack</span>
-               <h1 className="text-4xl lg:text-5xl font-black text-white uppercase tracking-tighter leading-none">{bundle.title}</h1>
+               <h1 className="text-4xl lg:text-5xl font-black text-white uppercase tracking-normal leading-none">{bundle.title}</h1>
             </div>
           </motion.div>
 
@@ -125,7 +142,7 @@ export default function BundleDetail() {
           <div className="glass-pod p-10 rounded-[2.5rem] space-y-6">
             <div className="flex items-center gap-4">
                <div className="w-1.5 h-8 bg-blue-600 rounded-full" />
-               <h2 className="text-2xl font-black uppercase tracking-tighter">About this Bundle</h2>
+               <h2 className="text-2xl font-black uppercase tracking-normal">About this Bundle</h2>
             </div>
             <p className="text-lg opacity-80 leading-relaxed font-medium">{bundle.description}</p>
           </div>
@@ -133,7 +150,7 @@ export default function BundleDetail() {
           {/* Side-by-Side Preview (Contents) */}
           <div className="glass-pod p-10 rounded-[2.5rem] space-y-8">
             <div className="flex items-center justify-between gap-4">
-              <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
+              <h2 className="text-2xl font-black uppercase tracking-normal flex items-center gap-3">
                 <span className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500"><Check size={20} /></span> Contents Breakdown
               </h2>
               <span className="text-xs font-black uppercase tracking-widest opacity-40">{bundle.items.length} Premium Modules</span>

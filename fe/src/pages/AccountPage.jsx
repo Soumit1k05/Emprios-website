@@ -140,7 +140,7 @@ export default function AccountPage({ onLogout }) {
         {/* Name + meta */}
         <div className="flex-1 text-center sm:text-left space-y-2">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-            <h2 className="text-2xl font-black uppercase tracking-tighter">{user?.name}</h2>
+            <h2 className="text-2xl font-black uppercase tracking-normal">{user?.name}</h2>
             <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest w-fit mx-auto sm:mx-0 ${
               user?.role === 'admin'
                 ? 'bg-purple-500/15 text-purple-400 border border-purple-500/20'

@@ -28,12 +28,13 @@ export default function BundleSuccess() {
           const bundle = mockBundles.find(b => b._id === id);
 
           if (bundle) {
-            setBundleData({
-              bundleTitle: bundle.title,
-              items: bundle.items,
-              purchaseDate: new Date().toISOString()
-            });
-            setError(null);
+              setBundleData({
+                bundleTitle: bundle.title,
+                items: bundle.items,
+                purchaseDate: new Date().toISOString(),
+                downloadUrl: bundle.downloadUrl
+              });
+              setError(null);
           }
         } catch (e) {
           console.error('Error loading bundle data:', e);
@@ -128,7 +129,7 @@ export default function BundleSuccess() {
         className="glass-pod p-8 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6"
       >
         <div className="space-y-2 text-center md:text-left">
-          <h2 className="text-3xl font-black uppercase tracking-tighter">
+          <h2 className="text-3xl font-black uppercase tracking-normal">
             {bundleData.bundleTitle}
           </h2>
           <div className="flex flex-wrap justify-center md:justify-start gap-4 text-xs opacity-60 font-black uppercase tracking-widest">
@@ -142,26 +143,28 @@ export default function BundleSuccess() {
           onClick={async () => {
             try {
               const data = await bundleAPI.getDownloadLink(id);
-              if (data.downloadUrl) {
-                const link = document.createElement('a');
-                link.href = data.downloadUrl;
-                link.download = `${bundleData.bundleTitle.replace(/\s+/g, '_')}_Bundle.zip`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                alert('Your bundle download has started! Using secured link.');
-              } else {
-                alert('Download link not found. Please try again.');
+                if (data.downloadUrl) {
+                  const link = document.createElement('a');
+                  link.href = data.downloadUrl;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  alert('Your bundle download has started! Using secured link.');
+                } else {
+                  alert('Download link not found. Please try again.');
+                }
+              } catch (err) {
+                // Fallback if API fails
+                if (bundleData.downloadUrl) {
+                  const link = document.createElement('a');
+                  link.href = bundleData.downloadUrl;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                } else {
+                  alert('Download link not found.');
+                }
               }
-            } catch (err) {
-              // Fallback if API fails
-              const link = document.createElement('a');
-              link.href = 'https://github.com/Soumit1k05/Emprios-website/archive/refs/heads/main.zip'; 
-              link.download = `${bundleData.bundleTitle.replace(/\s+/g, '_')}_Bundle.zip`;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            }
           }}
           className="px-8 py-4 bg-green-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-green-700 hover:scale-105 transition-all shadow-xl shadow-green-500/20 flex items-center gap-3 shrink-0"
         >

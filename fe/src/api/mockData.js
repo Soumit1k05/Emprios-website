@@ -11,7 +11,8 @@ export const mockBundles = [
       { name: 'Introduction to Marketing', type: 'course', description: 'Core concepts and principles.' },
       { name: 'Email Marketing Basics', type: 'course', description: 'How to build and nurture email lists.' },
       { name: 'Marketing Strategy Templates', type: 'pdf', description: 'Ready-to-use planning templates.' }
-    ]
+    ],
+    downloadUrl: 'https://github.com/microsoft/Web-Dev-For-Beginners/archive/refs/heads/main.zip'
   },
   {
     _id: '2',
@@ -24,7 +25,8 @@ export const mockBundles = [
       { name: 'Instagram Growth Mastery', type: 'course', description: 'Advanced tactics for Instagram.' },
       { name: 'TikTok Marketing Guide', type: 'course', description: 'Short-form content strategies.' },
       { name: 'Ad Campaign Manager', type: 'pdf', description: 'Optimizing paid social ads.' }
-    ]
+    ],
+    downloadUrl: 'https://github.com/freeCodeCamp/freeCodeCamp/archive/refs/heads/main.zip'
   },
   {
     _id: '3',
@@ -37,7 +39,8 @@ export const mockBundles = [
       { name: 'Blockchain Fundamentals', type: 'course', description: 'How crypto actually works.' },
       { name: 'Trading Basics & Charting', type: 'course', description: 'Technical analysis and indicators.' },
       { name: 'Security & Wallet Guide', type: 'pdv', description: 'Keeping your assets safe.' }
-    ]
+    ],
+    downloadUrl: 'https://github.com/bitcoin/bitcoin/archive/refs/heads/master.zip'
   },
   {
     _id: '4',
@@ -50,7 +53,8 @@ export const mockBundles = [
       { name: 'Equity Research & Valuation', type: 'course', description: 'Analyzing stocks like a pro.' },
       { name: 'Real Estate Investment Strategies', type: 'course', description: 'Rental yield and appreciation.' },
       { name: 'Wealth Tax Management', type: 'pdf', description: 'Optimizing your portfolio returns.' }
-    ]
+    ],
+    downloadUrl: 'https://github.com/public-apis/public-apis/archive/refs/heads/master.zip'
   }
 ];
 
@@ -126,7 +130,8 @@ export const mockBundleAPI = {
     return {
       bundleTitle: bundle.title,
       items: bundle.items,
-      purchaseDate: new Date()
+      purchaseDate: new Date(),
+      downloadUrl: bundle.downloadUrl
     };
   }
 };

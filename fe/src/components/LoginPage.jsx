@@ -48,7 +48,7 @@ export default function LoginPage() {
       >
         <div className="flex flex-col items-center mb-8">
            <Logo size="h-12" className="mb-4" />
-          <h2 className="text-3xl font-black uppercase tracking-tighter">Welcome Back</h2>
+          <h2 className="text-3xl font-black uppercase tracking-normal">Welcome Back</h2>
           <p className="text-xs font-bold opacity-50 uppercase tracking-widest mt-2">Sign in to your Empiros account.</p>
         </div>
 
