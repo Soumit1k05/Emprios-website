@@ -21,7 +21,6 @@ const ActionMenu = ({ isOpen, onClose }) => {
   );
 };
 
-// --- DYNAMIC DATA MAPPING ---
 const chartDataMapping = {
   '12 MONTHS': [
     { label: 'Feb', val: 40, color: '#60a5fa' }, { label: 'Mar', val: 30, color: '#818cf8' }, 
@@ -119,7 +118,7 @@ export default function Dashboard() {
       let currentOffset = 0;
       return (
         <div className="w-full h-full flex items-center justify-center p-2">
-          <svg viewBox="0 0 50 50" className="max-h-full w-full max-w-[16rem] transform -rotate-90 drop-shadow-2xl overflow-visible">
+          <svg viewBox="0 0 50 50" className="h-full w-full max-w-[16rem] transform -rotate-90 drop-shadow-2xl overflow-visible">
             <circle cx="25" cy="25" r="15.9155" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
             
             {currentChartData.map((d, i) => {
@@ -141,7 +140,6 @@ export default function Dashboard() {
       );
     }
 
-    // Area Chart (SVG)
     return (
       <div className="w-full h-full flex items-end">
         <svg viewBox="0 0 100 40" className="w-full h-full overflow-visible preserve-3d" preserveAspectRatio="none">
@@ -165,14 +163,12 @@ export default function Dashboard() {
             </mask>
           </defs>
 
-          {/* Area Fill */}
           <path 
             d={generateAreaPath(currentChartData, false)} 
             fill="url(#dynamicGradient)" 
             mask="url(#fadeMask)"
             className="transition-all duration-700 ease-in-out" 
           />
-          {/* Top Line (Now colorful!) */}
           <path 
             d={generateAreaPath(currentChartData, true)} 
             fill="none" 
@@ -180,7 +176,6 @@ export default function Dashboard() {
             strokeWidth="0.8" 
             className="transition-all duration-700 ease-in-out drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]"
           />
-          {/* Data Points */}
           {currentChartData.map((d, i) => (
             <circle 
               key={i} 
@@ -259,9 +254,12 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Sales Report Chart Container */}
-        <Widget className="col-span-2 relative h-[26rem] flex flex-col">
-          <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-6">
+        
+        {/* --- FIXED SALES REPORT CONTAINER USING STRICT GRID --- */}
+        <Widget className="col-span-2 relative h-[26rem] grid grid-rows-[auto_minmax(0,1fr)_auto] gap-2">
+          
+          {/* Header Row (Row 1) */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-4">
             <div className="flex items-center gap-4">
               <h3 className="text-lg font-black uppercase">Sales Report</h3>
               <div className="hidden sm:flex bg-white/5 border border-white/10 rounded-lg p-1 gap-1">
@@ -313,18 +311,20 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* FIX: min-h-0 prevents flexbox from stretching. Absolute inset ensures charts perfectly fit the empty space. */}
-          <div className="flex-1 w-full relative mt-2 min-h-0">
+          {/* Chart Wrapper (Row 2) - Physically cannot push the rows above/below it */}
+          <div className="relative w-full h-full">
             <div className="absolute inset-0">
                {renderNativeChart()}
             </div>
           </div>
           
-          {/* LABELS: Now safely locked inside the widget box! */}
-          <div className="flex justify-between text-[11px] font-bold opacity-40 mt-4 px-2 uppercase tracking-widest">
+          {/* Labels Row (Row 3) */}
+          <div className="flex justify-between text-[11px] font-bold opacity-40 mt-2 px-2 uppercase tracking-widest">
             {currentChartData.map(m => <span key={m.label}>{m.label}</span>)}
           </div>
         </Widget>
+        {/* --- END FIXED COMPONENT --- */}
+
 
         {/* Traffic Sources */}
         <Widget className="flex flex-col">
