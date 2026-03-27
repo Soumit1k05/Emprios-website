@@ -40,6 +40,7 @@ export default function AccountPage({ onLogout }) {
   const { user, login, logout } = useAuth();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState('');
   const [saveType, setSaveType] = useState('success');
   const [form, setForm] = useState({
     name: user?.name || '',
