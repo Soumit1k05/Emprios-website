@@ -4,11 +4,14 @@ import { X, Check, Loader, AlertCircle, Copy } from 'lucide-react';
 
 export default function RazorpayPaymentModal({ isOpen, bundle, onClose, onPaymentSuccess, affiliateCode }) {
   const [step, setStep] = useState('details'); // details, processing, success, error
-  const [formData, setFormData] = useState({
-    name: localStorage.getItem('userName') || '',
-    email: localStorage.getItem('userEmail') || '',
-    phoneNumber: localStorage.getItem('userPhone') || '',
-    upiId: '',
+  const [formData, setFormData] = useState(() => {
+    const storedUser = JSON.parse(localStorage.getItem('empiros_user') || '{}');
+    return {
+      name: storedUser.name || localStorage.getItem('userName') || '',
+      email: storedUser.email || localStorage.getItem('userEmail') || '',
+      phoneNumber: storedUser.phone || localStorage.getItem('userPhone') || '',
+      upiId: '',
+    };
   });
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
@@ -24,7 +27,7 @@ export default function RazorpayPaymentModal({ isOpen, bundle, onClose, onPaymen
   // Calculate affiliate commission (10% if affiliate code used)
   useEffect(() => {
     if (affiliateCode) {
-      setAffiliateCommission(Math.ceil(bundle.price * 0.1));
+      setAffiliateCommission(Math.ceil(bundle.price * 0.6));
     }
   }, [bundle.price, affiliateCode]);
 
@@ -204,7 +207,7 @@ export default function RazorpayPaymentModal({ isOpen, bundle, onClose, onPaymen
                     </div>
                     {affiliateCode && (
                       <div className="flex justify-between items-center text-green-400">
-                        <span className="text-xs">Your Commission (10%)</span>
+                        <span className="text-xs">Your Commission (60%)</span>
                         <span className="font-bold">₹{affiliateCommission}</span>
                       </div>
                     )}

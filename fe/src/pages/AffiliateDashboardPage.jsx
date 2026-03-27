@@ -100,7 +100,7 @@ export default function AffiliateDashboard() {
             <p className="text-xs opacity-60 uppercase tracking-widest">Total Earnings</p>
             <p className="text-4xl font-black mt-2">₹{stats.totalEarnings}</p>
           </div>
-          <p className="text-xs opacity-50">10% commission on each sale</p>
+          <p className="text-xs opacity-50">60% commission on each sale</p>
         </motion.div>
 
         <motion.div
@@ -195,7 +195,7 @@ export default function AffiliateDashboard() {
 
         <div className="bg-green-500/20 border border-green-500/40 rounded-xl p-4">
           <p className="text-xs text-green-300">
-            💡 Share your referral link with friends and earn ₹{Math.ceil(0 * 0.1)} commission on each bundle purchase!
+            💡 Share your referral link with friends and earn 60% commission on each bundle purchase!
           </p>
         </div>
       </motion.div>
@@ -221,7 +221,7 @@ export default function AffiliateDashboard() {
                 <div className="flex-1">
                   <h3 className="font-bold text-base">{bundle.title}</h3>
                   <p className="text-xs opacity-60 mt-1">
-                    Price: ₹{bundle.price} • Earn: ₹{Math.ceil(bundle.price * 0.1)}
+                    Price: ₹{bundle.price} • Earn: ₹{Math.ceil(bundle.price * 0.6)}
                   </p>
                 </div>
 

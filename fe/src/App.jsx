@@ -11,8 +11,10 @@ import BundleSuccess from './pages/BundleSuccess';
 import AffiliateDashboardPage from './pages/AffiliateDashboardPage';
 import AccountPage from './pages/AccountPage';
 import RegistrationPage from './components/RegistrationPage';
+import LoginPage from './components/LoginPage';
 import Dashboard from './pages/Dashboard';
 import Logo from './components/Logo';
+import { useAuth } from './context/AuthContext';
 
 
 
@@ -65,13 +67,21 @@ const BundleCard = ({ name, price, features, popular }) => (
 );
 
 function AppContent() {
-  const [isDark, setIsDark] = useState(false);
+  const { user } = useAuth();
+  const [isDark, setIsDark] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    return saved ? JSON.parse(saved) : false;
+  });
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    if (isDark) document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', JSON.stringify(isDark));
   }, [isDark]);
 
   const handleBack = () => {
@@ -110,7 +120,11 @@ function AppContent() {
             <NavItem active={location.pathname === '/bundles'} onClick={() => navigate('/bundles')}>Bundles</NavItem>
             <NavItem active={location.pathname === '/affiliate'} onClick={() => navigate('/affiliate')}>Affiliate</NavItem>
             <NavItem active={location.pathname === '/dashboard'} onClick={() => navigate('/dashboard')}>Dashboard</NavItem>
-            <NavItem active={location.pathname === '/account'} onClick={() => navigate('/account')}>Account</NavItem>
+            {user ? (
+               <NavItem active={location.pathname === '/account'} onClick={() => navigate('/account')}>Account</NavItem>
+            ) : (
+               <NavItem active={location.pathname === '/login'} onClick={() => navigate('/login')}>Login</NavItem>
+            )}
 
           </nav>
 
@@ -224,6 +238,12 @@ function AppContent() {
               <Route path="/register" element={
                 <motion.div key="register" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <RegistrationPage />
+                </motion.div>
+              } />
+
+              <Route path="/login" element={
+                <motion.div key="login" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <LoginPage />
                 </motion.div>
               } />
             </Routes>
