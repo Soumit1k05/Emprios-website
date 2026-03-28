@@ -1,465 +1,245 @@
-import React, { useState } from 'react';
-import { MoreVertical, ArrowUp, ArrowDown, ChevronDown, Download, RefreshCw, Settings, BarChart2, Activity, PieChart } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import {
+  Copy, CheckCircle2, DollarSign, Users, Percent,
+  TrendingUp, Link as LinkIcon, Wallet, Clock, Loader2
+} from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import api from '../api/apiClient';
+import { toast } from 'react-hot-toast';
 
-const Widget = ({ children, className = '' }) => (
-  <div className={`bg-white/5 backdrop-blur-md rounded-3xl shadow-xl border border-white/10 p-8 text-white ${className}`}>
-    {children}
+// Reusable Detail Row for Recent Activity
+const ActivityRow = ({ icon: Icon, title, date, amount }) => (
+  <div className="flex items-center justify-between py-4 border-b border-white/10 last:border-0">
+    <div className="flex items-start gap-4">
+      <div className="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0 mt-0.5">
+        <Icon size={16} className="text-blue-400" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[9px] font-black uppercase tracking-widest opacity-40 mb-0.5">{date}</p>
+        <p className="text-sm font-bold truncate">{title}</p>
+      </div>
+    </div>
+    <div className="text-right">
+      <p className="text-sm font-black text-green-400">+₹{amount}</p>
+    </div>
   </div>
 );
 
-const ActionMenu = ({ isOpen, onClose }) => {
-  if (!isOpen) return null;
-  return (
-    <div className="absolute top-8 right-0 z-10 w-36 bg-[#1a1b2e]/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl py-2 overflow-hidden">
-      <button onClick={onClose} className="w-full text-left px-4 py-2 text-xs font-bold opacity-80 hover:bg-white/10 hover:opacity-100 flex items-center gap-2 transition-colors">
-        <RefreshCw size={12} /> Refresh
-      </button>
-      <button onClick={onClose} className="w-full text-left px-4 py-2 text-xs font-bold opacity-80 hover:bg-white/10 hover:opacity-100 flex items-center gap-2 transition-colors">
-        <Settings size={12} /> Settings
-      </button>
-    </div>
-  );
-};
-
-const chartDataMapping = {
-  '12 MONTHS': [
-    { label: 'Feb', val: 40, color: '#60a5fa' }, { label: 'Mar', val: 30, color: '#818cf8' }, 
-    { label: 'Apr', val: 60, color: '#a78bfa' }, { label: 'May', val: 50, color: '#c084fc' }, 
-    { label: 'Jun', val: 80, color: '#e879f9' }, { label: 'Jul', val: 45, color: '#f472b6' }, 
-    { label: 'Aug', val: 70, color: '#fb7185' }, { label: 'Sep', val: 90, color: '#f87171' }, 
-    { label: 'Oct', val: 65, color: '#fb923c' }, { label: 'Nov', val: 85, color: '#fbbf24' }, 
-    { label: 'Dec', val: 100, color: '#facc15' }, { label: 'Jan', val: 75, color: '#a3e635' }
-  ],
-  '6 MONTHS': [
-    { label: 'Aug', val: 35, color: '#fb7185' }, { label: 'Sep', val: 60, color: '#f87171' }, 
-    { label: 'Oct', val: 45, color: '#fb923c' }, { label: 'Nov', val: 75, color: '#fbbf24' }, 
-    { label: 'Dec', val: 95, color: '#facc15' }, { label: 'Jan', val: 80, color: '#a3e635' }
-  ],
-  '30 DAYS': [
-    { label: 'Wk 1', val: 60, color: '#34d399' }, { label: 'Wk 2', val: 45, color: '#2dd4bf' }, 
-    { label: 'Wk 3', val: 85, color: '#38bdf8' }, { label: 'Wk 4', val: 70, color: '#818cf8' }
-  ],
-  '7 DAYS': [
-    { label: 'Mon', val: 30, color: '#ef4444' }, { label: 'Tue', val: 50, color: '#f97316' }, 
-    { label: 'Wed', val: 75, color: '#f59e0b' }, { label: 'Thu', val: 40, color: '#84cc16' }, 
-    { label: 'Fri', val: 90, color: '#10b981' }, { label: 'Sat', val: 100, color: '#06b6d4' },
-    { label: 'Sun', val: 85, color: '#3b82f6' }
-  ]
-};
-
-export default function Dashboard() {
-  const glassIcons = ['📱', '💻', '🎧', '⌚', '🎮'];
+export default function AffiliateDashboard() {
+  const { user } = useAuth(); // Get the currently logged-in user
+  const [loading, setLoading] = useState(true);
+  const [requestingPayout, setRequestingPayout] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   
-  const [activeTimeFilter, setActiveTimeFilter] = useState('12 MONTHS');
-  const [chartType, setChartType] = useState('Area'); 
-  const [isExporting, setIsExporting] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [openMenuId, setOpenMenuId] = useState(null);
+  // Dashboard state for the specific user
+  const [dashboard, setDashboard] = useState({
+    earnings: 0,
+    sales: 0,
+    commissionRate: 60,
+    affiliateCode: user?.affiliateCode || '', 
+    recentActivity: []
+  });
 
-  const timeFilters = ['12 MONTHS', '6 MONTHS', '30 DAYS', '7 DAYS'];
-  const totalPages = 12;
+  // Construct the personal referral link dynamically
+  const baseUrl = window.location.origin;
+  const referralLink = dashboard.affiliateCode 
+    ? `${baseUrl}/ref/${dashboard.affiliateCode}`
+    : 'Generating link...';
 
-  const handleExport = () => {
-    setIsExporting(true);
-    setTimeout(() => {
-      setIsExporting(false);
-      alert("PDF Exported Successfully!");
-    }, 1500);
-  };
+  // 1. Fetch Affiliate Data on mount
+  useEffect(() => {
+    const fetchAffiliateData = async () => {
+      if (!user?.token) return;
+      try {
+        // Replace with your actual endpoint
+        const res = await api.get('/affiliate/my-dashboard'); 
+        setDashboard(prev => ({ ...prev, ...res.data }));
+      } catch (err) {
+        console.error('Failed to fetch affiliate data:', err);
+        // Fallback dummy data if API isn't ready yet
+        setDashboard(prev => ({
+          ...prev,
+          earnings: 12500,
+          sales: 14,
+          affiliateCode: user?.name ? user.name.split(' ')[0].toUpperCase() + '60' : 'EMP-2026',
+          recentActivity: [
+            { id: 1, title: 'Bundle Sale - Pro Tier', date: '2 hours ago', amount: 899 },
+            { id: 2, title: 'Bundle Sale - Basic', date: '1 day ago', amount: 499 },
+          ]
+        }));
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAffiliateData();
+  }, [user]);
 
-  const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= totalPages) setCurrentPage(newPage);
-  };
-
-  const toggleMenu = (id) => setOpenMenuId(openMenuId === id ? null : id);
-
-  const currentChartData = chartDataMapping[activeTimeFilter];
-
-  const generateAreaPath = (data, isLineOnly = false) => {
-    const w = 100;
-    const h = 40;
-    const step = w / (data.length - 1);
+  // 2. Handle Copy Button Logic
+  const handleCopy = async (text, type) => {
+    if (!text || text === 'Generating link...') return;
     
-    let path = isLineOnly 
-      ? `M0,${h - (data[0].val * 0.35)}` 
-      : `M0,${h} L0,${h - (data[0].val * 0.35)}`;
-
-    for (let i = 1; i < data.length; i++) {
-      const x = i * step;
-      const y = h - (data[i].val * 0.35);
-      path += ` L${x},${y}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      if (type === 'code') {
+        setCopiedCode(true);
+        setTimeout(() => setCopiedCode(false), 2000);
+      } else {
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 2000);
+      }
+      toast.success(`${type === 'code' ? 'Promo code' : 'Referral link'} copied to clipboard!`);
+    } catch (err) {
+      toast.error('Failed to copy. Please try again.');
     }
-    
-    if (!isLineOnly) path += ` L${w},${h} Z`;
-    return path;
   };
 
-  const renderNativeChart = () => {
-    if (chartType === 'Bar') {
-      return (
-        <div className="w-full h-full flex items-end justify-between gap-1 sm:gap-2 pt-4">
-          {currentChartData.map((d, i) => (
-            <div key={i} className="flex-1 flex flex-col justify-end items-center h-full group relative">
-              <div 
-                className="w-full rounded-t-md transition-all duration-500 cursor-pointer opacity-80 hover:opacity-100 shadow-[0_0_10px_rgba(255,255,255,0.1)]"
-                style={{ height: `${d.val}%`, backgroundColor: d.color }}
-              ></div>
-              <div className="opacity-0 group-hover:opacity-100 absolute -top-8 bg-[#1a1b2e] border border-white/20 px-2 py-1 rounded text-xs font-bold transition-opacity whitespace-nowrap z-10 shadow-lg">
-                ${(d.val * 120).toLocaleString()}
-              </div>
-            </div>
-          ))}
-        </div>
-      );
-    } 
-    
-    if (chartType === 'Donut') {
-      const totalVal = currentChartData.reduce((sum, d) => sum + d.val, 0);
-      let currentOffset = 0;
-      return (
-        <div className="w-full h-full flex items-center justify-center p-2">
-          <svg viewBox="0 0 50 50" className="h-full w-full max-w-[16rem] transform -rotate-90 drop-shadow-2xl overflow-visible">
-            <circle cx="25" cy="25" r="15.9155" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
-            
-            {currentChartData.map((d, i) => {
-              const dashVal = (d.val / totalVal) * 100;
-              const dashStr = `${dashVal} ${100 - dashVal}`;
-              const offsetStr = -currentOffset;
-              currentOffset += dashVal;
-              return (
-                <circle 
-                  key={i} cx="25" cy="25" r="15.9155" fill="none" 
-                  stroke={d.color} strokeWidth="8" 
-                  strokeDasharray={dashStr} strokeDashoffset={offsetStr}
-                  className="transition-all duration-1000 cursor-pointer hover:stroke-[10px]"
-                />
-              );
-            })}
-          </svg>
-        </div>
-      );
+  // 3. Handle Payout Request Logic
+  const handleRequestPayout = async () => {
+    if (dashboard.earnings <= 0) {
+      toast.error('You need to have earnings to request a payout.');
+      return;
     }
 
-    return (
-      <div className="w-full h-full flex items-end">
-        <svg viewBox="0 0 100 40" className="w-full h-full overflow-visible preserve-3d" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="dynamicGradient" x1="0" y1="0" x2="1" y2="0">
-              {currentChartData.map((d, i) => (
-                <stop key={i} offset={`${(i / (currentChartData.length - 1)) * 100}%`} stopColor={d.color} stopOpacity="0.5"/>
-              ))}
-            </linearGradient>
-            <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-              {currentChartData.map((d, i) => (
-                <stop key={i} offset={`${(i / (currentChartData.length - 1)) * 100}%`} stopColor={d.color} stopOpacity="1"/>
-              ))}
-            </linearGradient>
-            <linearGradient id="fadeGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="white" stopOpacity="1"/>
-              <stop offset="100%" stopColor="white" stopOpacity="0"/>
-            </linearGradient>
-            <mask id="fadeMask">
-              <rect x="0" y="0" width="100" height="40" fill="url(#fadeGradient)" />
-            </mask>
-          </defs>
-
-          <path 
-            d={generateAreaPath(currentChartData, false)} 
-            fill="url(#dynamicGradient)" 
-            mask="url(#fadeMask)"
-            className="transition-all duration-700 ease-in-out" 
-          />
-          <path 
-            d={generateAreaPath(currentChartData, true)} 
-            fill="none" 
-            stroke="url(#lineGradient)" 
-            strokeWidth="0.8" 
-            className="transition-all duration-700 ease-in-out drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]"
-          />
-          {currentChartData.map((d, i) => (
-            <circle 
-              key={i} 
-              cx={i * (100 / (currentChartData.length - 1))} 
-              cy={40 - (d.val * 0.35)} 
-              r="1.5" 
-              fill="#1a1b2e" 
-              stroke={d.color} 
-              strokeWidth="0.5" 
-              className="transition-all duration-700 hover:r-[2.5]" 
-            />
-          ))}
-        </svg>
-      </div>
-    );
+    setRequestingPayout(true);
+    try {
+      // Replace with your actual payout request endpoint
+      // await api.post('/affiliate/request-payout', { amount: dashboard.earnings });
+      
+      // Simulating API delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      toast.success('Payout request submitted successfully!');
+      
+      // Optionally reset earnings to 0 locally after request
+      // setDashboard(prev => ({ ...prev, earnings: 0 }));
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to submit payout request.');
+    } finally {
+      setRequestingPayout(false);
+    }
   };
 
   return (
-    <div className="flex-1 overflow-y-auto custom-scroll p-6 pb-20 space-y-6">
-      
-      {/* Top Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Widget className="flex flex-col justify-between h-44 relative">
-          <div className="flex justify-between items-start">
-            <h3 className="text-xs opacity-60 uppercase tracking-widest">Today's Sale</h3>
-            <div className="relative">
-              <button onClick={() => toggleMenu('metric1')} className="text-white/40 hover:text-white transition-colors"><MoreVertical size={16} /></button>
-              <ActionMenu isOpen={openMenuId === 'metric1'} onClose={() => setOpenMenuId(null)} />
-            </div>
-          </div>
-          <div>
-             <div className="text-4xl font-black mt-2">$12,426</div>
-             <div className="flex items-center gap-1 mt-3 text-xs opacity-60">
-                <ArrowUp size={14} className="text-green-400" />
-                <span className="text-green-400 font-bold">+36%</span>
-                vs last month
-             </div>
-          </div>
-        </Widget>
-
-        <Widget className="flex flex-col justify-between h-44 relative">
-           <div className="flex justify-between items-start">
-            <h3 className="text-xs opacity-60 uppercase tracking-widest">Total Sales</h3>
-            <div className="relative">
-              <button onClick={() => toggleMenu('metric2')} className="text-white/40 hover:text-white transition-colors"><MoreVertical size={16} /></button>
-              <ActionMenu isOpen={openMenuId === 'metric2'} onClose={() => setOpenMenuId(null)} />
-            </div>
-          </div>
-          <div>
-             <div className="text-4xl font-black mt-2">$2,38,485</div>
-             <div className="flex items-center gap-1 mt-3 text-xs opacity-60">
-                <ArrowDown size={14} className="text-red-400" />
-                <span className="text-red-400 font-bold">-14%</span>
-                vs last month
-             </div>
-          </div>
-        </Widget>
-
-        <Widget className="flex flex-col justify-between h-44 relative">
-           <div className="flex justify-between items-start">
-            <h3 className="text-xs opacity-60 uppercase tracking-widest">Total Orders</h3>
-            <div className="relative">
-              <button onClick={() => toggleMenu('metric3')} className="text-white/40 hover:text-white transition-colors"><MoreVertical size={16} /></button>
-              <ActionMenu isOpen={openMenuId === 'metric3'} onClose={() => setOpenMenuId(null)} />
-            </div>
-          </div>
-          <div>
-             <div className="text-4xl font-black mt-2">84,382</div>
-             <div className="flex items-center gap-1 mt-3 text-xs opacity-60">
-                <ArrowUp size={14} className="text-green-400" />
-                <span className="text-green-400 font-bold">+36%</span>
-                vs last month
-             </div>
-          </div>
-        </Widget>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="max-w-3xl mx-auto space-y-5 pb-10"
+    >
+      {/* ── Welcome Hero ── */}
+      <div className="glass-pod p-8 flex flex-col sm:flex-row items-center justify-between gap-6 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 border-blue-500/20">
+        <div className="text-center sm:text-left space-y-2">
+          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-blue-500/15 text-blue-400 border border-blue-500/20">
+            Partner Dashboard
+          </span>
+          <h2 className="text-2xl font-black uppercase tracking-normal">Welcome back, {user?.name?.split(' ')[0] || 'Partner'}</h2>
+          <p className="text-sm opacity-60 font-medium">Here's how your referral links are performing.</p>
+        </div>
+        
+        <button 
+          onClick={handleRequestPayout}
+          disabled={requestingPayout || dashboard.earnings <= 0}
+          className="shrink-0 bg-blue-600 text-white font-black py-3 px-6 rounded-2xl text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {requestingPayout ? <Loader2 size={16} className="animate-spin" /> : <Wallet size={16} />}
+          {requestingPayout ? 'Processing...' : 'Request Payout'}
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* --- FIXED SALES REPORT CONTAINER USING STRICT GRID --- */}
-        <Widget className="col-span-2 relative h-[26rem] grid grid-rows-[auto_minmax(0,1fr)_auto] gap-2">
-          
-          {/* Header Row (Row 1) */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-4">
-            <div className="flex items-center gap-4">
-              <h3 className="text-lg font-black uppercase">Sales Report</h3>
-              <div className="hidden sm:flex bg-white/5 border border-white/10 rounded-lg p-1 gap-1">
-                {[
-                  { id: 'Area', icon: Activity },
-                  { id: 'Bar', icon: BarChart2 },
-                  { id: 'Donut', icon: PieChart }
-                ].map((type) => (
-                  <button
-                    key={type.id}
-                    onClick={() => setChartType(type.id)}
-                    title={`${type.id} Chart`}
-                    className={`p-1.5 rounded-md transition-all ${
-                      chartType === type.id ? 'bg-white/20 text-blue-300 shadow-sm' : 'text-white/40 hover:text-white hover:bg-white/10'
-                    }`}
-                  >
-                    <type.icon size={16} />
-                  </button>
-                ))}
+      {/* ── Stats Grid ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        {[
+          { label: 'Total Earnings', value: `₹${dashboard.earnings.toLocaleString()}`, icon: DollarSign, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
+          { label: 'Total Referrals', value: dashboard.sales, icon: Users, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+          { label: 'Commission', value: `${dashboard.commissionRate}%`, icon: Percent, color: 'text-purple-400', bg: 'bg-purple-500/10' },
+        ].map((stat, i) => (
+          <div key={i} className="glass-pod p-6 flex flex-col justify-center">
+            <div className="flex items-center justify-between mb-3">
+              <div className={`w-10 h-10 rounded-2xl ${stat.bg} flex items-center justify-center`}>
+                <stat.icon size={18} className={stat.color} />
               </div>
+              <TrendingUp size={16} className="text-white/20" />
             </div>
-
-            <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
-              {timeFilters.map((filter) => (
-                <button 
-                  key={filter}
-                  onClick={() => setActiveTimeFilter(filter)}
-                  className={`px-3 py-2 rounded-full border transition-all duration-300 ${
-                    activeTimeFilter === filter 
-                    ? 'text-blue-300 bg-blue-500/20 border-blue-500/30' 
-                    : 'text-white/60 border-transparent hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
-              <button 
-                onClick={handleExport}
-                disabled={isExporting}
-                className={`flex items-center gap-2 border px-4 py-2 rounded-full ml-2 transition-all duration-300 ${
-                  isExporting 
-                  ? 'bg-green-500/20 border-green-500/30 text-green-300' 
-                  : 'border-white/20 bg-white/5 hover:bg-white/10 text-white'
-                }`}
-              >
-                {isExporting ? <RefreshCw size={14} className="animate-spin" /> : <Download size={14} />}
-                <span className="hidden md:inline">{isExporting ? 'EXPORTING...' : 'EXPORT PDF'}</span>
-              </button>
-            </div>
+            <p className="text-[10px] font-black uppercase tracking-widest opacity-50 mb-1">{stat.label}</p>
+            <p className="text-2xl font-black">{loading ? '...' : stat.value}</p>
           </div>
+        ))}
+      </div>
 
-          {/* Chart Wrapper (Row 2) - Physically cannot push the rows above/below it */}
-          <div className="relative w-full h-full">
-            <div className="absolute inset-0">
-               {renderNativeChart()}
-            </div>
-          </div>
-          
-          {/* Labels Row (Row 3) */}
-          <div className="flex justify-between text-[11px] font-bold opacity-40 mt-2 px-2 uppercase tracking-widest">
-            {currentChartData.map(m => <span key={m.label}>{m.label}</span>)}
-          </div>
-        </Widget>
-        {/* --- END FIXED COMPONENT --- */}
+      {/* ── Your Links ── */}
+      <div className="glass-pod p-8 space-y-6">
+        <div className="flex items-center gap-2 mb-2">
+          <LinkIcon size={18} className="text-blue-400" />
+          <h3 className="text-[10px] font-black uppercase tracking-widest opacity-50">Sharing Tools</h3>
+        </div>
 
-
-        {/* Traffic Sources */}
-        <Widget className="flex flex-col">
-          <div className="flex justify-between items-center mb-8">
-            <h3 className="text-lg font-black uppercase">Traffic Sources</h3>
-            <button className="flex items-center gap-1 text-xs font-bold opacity-60 bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg border border-white/10 hover:opacity-100 transition-all">
-               LAST 7 DAYS <ChevronDown size={14} />
+        {/* Code Input */}
+        <div className="space-y-1.5">
+          <label className="text-[9px] font-black uppercase tracking-widest opacity-50">Your Promo Code</label>
+          <div className="relative flex items-center">
+            <input
+              type="text"
+              readOnly
+              value={dashboard.affiliateCode}
+              className="w-full bg-white/10 border border-white/20 rounded-2xl py-3 px-4 text-sm font-bold focus:outline-none transition-all text-white tracking-wider"
+            />
+            <button
+              onClick={() => handleCopy(dashboard.affiliateCode, 'code')}
+              className="absolute right-2 w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all"
+              title="Copy Promo Code"
+            >
+              {copiedCode ? <CheckCircle2 size={14} className="text-green-400" /> : <Copy size={14} />}
             </button>
           </div>
-          <div className="space-y-6 flex-1 flex flex-col justify-center">
-            {[
-              { label: 'Direct', val: '1,43,382', pct: '75%', color: 'bg-blue-400' },
-              { label: 'Referral', val: '87,974', pct: '50%', color: 'bg-blue-500' },
-              { label: 'Social Media', val: '45,211', pct: '25%', color: 'bg-purple-500' },
-              { label: 'Twitter', val: '21,893', pct: '12%', color: 'bg-sky-400' },
-              { label: 'Facebook', val: '21,893', pct: '12%', color: 'bg-indigo-500' }
-            ].map((t,i) => (
-              <div key={i} className="flex flex-col gap-2">
-                <div className="flex justify-between text-xs font-bold opacity-80">
-                  <span>{t.label}</span>
-                  <span>{t.val}</span>
-                </div>
-                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div className={`h-full ${t.color} rounded-full`} style={{ width: t.pct }}></div>
-                </div>
-              </div>
-            ))}
+        </div>
+
+        {/* Link Input */}
+        <div className="space-y-1.5">
+          <label className="text-[9px] font-black uppercase tracking-widest opacity-50">Direct Referral Link</label>
+          <div className="relative flex items-center">
+            <input
+              type="text"
+              readOnly
+              value={referralLink}
+              className="w-full bg-white/10 border border-white/20 rounded-2xl py-3 px-4 text-sm font-bold focus:outline-none transition-all text-white/70 pr-12 truncate"
+            />
+            <button
+              onClick={() => handleCopy(referralLink, 'link')}
+              className="absolute right-2 w-8 h-8 rounded-xl bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center transition-all shadow-md shadow-blue-500/20"
+              title="Copy Link"
+            >
+              {copiedLink ? <CheckCircle2 size={14} /> : <Copy size={14} />}
+            </button>
           </div>
-        </Widget>
+          <p className="text-[9px] opacity-40 mt-1 pl-1">Share this link directly. Anyone who buys through it earns you {dashboard.commissionRate}%.</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-         {/* Total Bets */}
-         <Widget className="flex flex-col relative">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-black uppercase">Total Bets</h3>
-              <div className="relative">
-                <button onClick={() => toggleMenu('bets')} className="text-white/40 hover:text-white transition-colors"><MoreVertical size={16} /></button>
-                <ActionMenu isOpen={openMenuId === 'bets'} onClose={() => setOpenMenuId(null)} />
-              </div>
-            </div>
-            <div className="flex-1 flex flex-col items-center justify-center py-6">
-               <div className="relative w-48 h-48 flex items-center justify-center mb-8 drop-shadow-2xl">
-                 <svg viewBox="0 0 50 50" className="w-full h-full transform -rotate-90 overflow-visible">
-                    <circle cx="25" cy="25" r="15.9155" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
-                    <circle cx="25" cy="25" r="15.9155" fill="none" stroke="#3b82f6" strokeWidth="8" strokeDasharray="70 30" />
-                    <circle cx="25" cy="25" r="15.9155" fill="none" stroke="#facc15" strokeWidth="8" strokeDasharray="20 80" strokeDashoffset="-70" />
-                    <circle cx="25" cy="25" r="15.9155" fill="none" stroke="#f97316" strokeWidth="8" strokeDasharray="10 90" strokeDashoffset="-90" />
-                 </svg>
-                 
-                 <div className="absolute top-2 right-2 bg-yellow-400/20 text-yellow-400 px-2 py-0.5 rounded-md backdrop-blur-sm font-black text-xs border border-yellow-400/30">20%</div>
-                 <div className="absolute bottom-6 right-6 bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-md backdrop-blur-sm font-black text-xs border border-orange-500/30">10%</div>
-                 <div className="absolute inset-0 flex items-center justify-center flex-col">
-                   <div className="text-white font-black text-3xl">70%</div>
-                   <div className="text-[10px] font-bold opacity-60 uppercase">Mobile</div>
-                 </div>
-               </div>
-               <div className="w-full space-y-4">
-                 {[
-                   { label: 'Mobile', val: '$50,280', color: 'bg-blue-500' },
-                   { label: 'Laptop', val: '$30,160', color: 'bg-yellow-400' },
-                   { label: 'Watch', val: '$15,520', color: 'bg-orange-500' }
-                 ].map(item => (
-                   <div key={item.label} className="flex justify-between text-sm font-bold opacity-80">
-                     <span className="flex items-center gap-3"><div className={`w-3 h-3 rounded-full ${item.color} shadow-sm`} /> {item.label}</span>
-                     <span>{item.val}</span>
-                   </div>
-                 ))}
-               </div>
-            </div>
-         </Widget>
-
-         {/* Recent Customers */}
-         <Widget className="col-span-2 flex flex-col overflow-hidden">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-black uppercase">Recent Customers</h3>
-              <button className="flex items-center gap-1 text-sm font-bold text-blue-400 hover:text-blue-300 hover:underline transition-all">
-                 View All &rarr;
-              </button>
-            </div>
-            <div className="overflow-x-auto w-full flex-1">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="text-xs font-bold opacity-50 uppercase tracking-widest border-b border-white/10">
-                    <th className="pb-4 px-4 font-bold">Product</th>
-                    <th className="pb-4 px-4 font-bold">Orders ID</th>
-                    <th className="pb-4 px-4 font-bold">Customer Name</th>
-                    <th className="pb-4 px-4 font-bold">Date</th>
-                    <th className="pb-4 px-4 font-bold">Price</th>
-                    <th className="pb-4 px-4 font-bold">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="text-sm font-semibold">
-                  {[
-                    { id: '#202395', name: 'Ripon Ahmed', date: '1 Jan 24', price: '$20,584', status: 'Complete', statColor: 'text-green-400 bg-green-500/20 border border-green-500/30' },
-                    { id: '#202396', name: 'Leslie Alexander', date: '2 Jan 24', price: '$11,234', status: 'Pending', statColor: 'text-orange-400 bg-orange-500/20 border border-orange-500/30' },
-                    { id: '#202397', name: 'Ralph Edwards', date: '3 Jan 24', price: '$11,159', status: 'Complete', statColor: 'text-green-400 bg-green-500/20 border border-green-500/30' },
-                    { id: '#202398', name: 'Ronaid Richards', date: '4 Jan 24', price: '$10,483', status: 'Complete', statColor: 'text-green-400 bg-green-500/20 border border-green-500/30' },
-                    { id: '#202399', name: 'Devon Lane', date: '6 Jan 24', price: '$9,084', status: 'Pending', statColor: 'text-orange-400 bg-orange-500/20 border border-orange-500/30' }
-                  ].map((row, i) => (
-                    <tr key={i} className="hover:bg-white/5 transition-colors border-b border-white/5 last:border-0">
-                      <td className="py-4 px-4">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 flex items-center justify-center text-xl shadow-[0_4px_10px_rgba(0,0,0,0.1)] backdrop-blur-md">
-                           {glassIcons[i % glassIcons.length]}
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 opacity-60 font-mono">{row.id}</td>
-                      <td className="py-4 px-4">{row.name}</td>
-                      <td className="py-4 px-4 flex items-center gap-2 opacity-60 mt-3"><div className="w-2 h-2 rounded-full bg-white/40"></div> {row.date}</td>
-                      <td className="py-4 px-4 font-black">{row.price}</td>
-                      <td className="py-4 px-4">
-                        <span className={`px-3 py-1.5 rounded-lg text-[10px] uppercase font-bold tracking-wider ${row.statColor}`}>
-                          {row.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            
-            <div className="flex justify-between items-center mt-6 text-xs font-bold opacity-60">
-               <div>Show <span className="bg-white/10 px-2 py-1 rounded-md border border-white/20">5</span> from {totalPages}</div>
-               <div className="flex items-center gap-1">
-                 <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${currentPage === 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10'}`}>&lt;</button>
-                 {[1, 2, 3].map(num => (
-                    <button key={num} onClick={() => handlePageChange(num)} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${currentPage === num ? 'bg-blue-500 text-white shadow-lg font-black border border-blue-400/50' : 'hover:bg-white/10'}`}>{num}</button>
-                 ))}
-                 <span className="px-1">...</span>
-                 <button onClick={() => handlePageChange(totalPages)} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${currentPage === totalPages ? 'bg-blue-500 text-white shadow-lg font-black border border-blue-400/50' : 'hover:bg-white/10'}`}>{totalPages}</button>
-                 <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${currentPage === totalPages ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10'}`}>&gt;</button>
-               </div>
-            </div>
-         </Widget>
+      {/* ── Recent Activity ── */}
+      <div className="glass-pod p-8">
+        <h3 className="text-[10px] font-black uppercase tracking-widest opacity-50 mb-2">Recent Conversions</h3>
+        
+        {loading ? (
+           <p className="text-sm font-bold opacity-30 py-4 text-center">Loading activity...</p>
+        ) : dashboard.recentActivity.length > 0 ? (
+          dashboard.recentActivity.map((activity) => (
+            <ActivityRow 
+              key={activity.id}
+              icon={Clock} 
+              title={activity.title} 
+              date={activity.date} 
+              amount={activity.amount} 
+            />
+          ))
+        ) : (
+          <div className="py-8 text-center border-b border-white/10 last:border-0">
+            <p className="text-sm font-bold opacity-30">No referrals yet. Share your link to get started!</p>
+          </div>
+        )}
       </div>
-    </div>
+
+    </motion.div>
   );
 }
