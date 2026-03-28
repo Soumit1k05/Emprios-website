@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
-import { MoreVertical, ArrowUp, ArrowDown, ChevronDown, Download, RefreshCw, Settings, BarChart2, Activity, PieChart } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { 
+  MoreVertical, ArrowUp, ArrowDown, ChevronDown, Download, 
+  RefreshCw, Settings, BarChart2, Activity, PieChart, 
+  ShoppingCart, DollarSign, Target, Users
+} from 'lucide-react';
 
-const Widget = ({ children, className = '' }) => (
-  <div className={`bg-white/5 backdrop-blur-md rounded-3xl shadow-xl border border-white/10 p-8 text-white ${className}`}>
-    {children}
-  </div>
-);
-
+// Reusable Action Menu adapted for the glass aesthetic
 const ActionMenu = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   return (
-    <div className="absolute top-8 right-0 z-10 w-36 bg-[#1a1b2e]/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl py-2 overflow-hidden">
-      <button onClick={onClose} className="w-full text-left px-4 py-2 text-xs font-bold opacity-80 hover:bg-white/10 hover:opacity-100 flex items-center gap-2 transition-colors">
+    <div className="absolute top-8 right-0 z-20 w-36 glass-pod p-2 shadow-2xl overflow-hidden border border-white/20 bg-[#0f1021]/90 backdrop-blur-xl">
+      <button onClick={onClose} className="w-full text-left px-3 py-2 text-[9px] font-black uppercase tracking-widest opacity-60 hover:bg-white/10 hover:opacity-100 rounded-lg flex items-center gap-2 transition-colors">
         <RefreshCw size={12} /> Refresh
       </button>
-      <button onClick={onClose} className="w-full text-left px-4 py-2 text-xs font-bold opacity-80 hover:bg-white/10 hover:opacity-100 flex items-center gap-2 transition-colors">
+      <button onClick={onClose} className="w-full text-left px-3 py-2 text-[9px] font-black uppercase tracking-widest opacity-60 hover:bg-white/10 hover:opacity-100 rounded-lg flex items-center gap-2 transition-colors">
         <Settings size={12} /> Settings
       </button>
     </div>
@@ -104,7 +104,7 @@ export default function Dashboard() {
                 className="w-full rounded-t-md transition-all duration-500 cursor-pointer opacity-80 hover:opacity-100 shadow-[0_0_10px_rgba(255,255,255,0.1)]"
                 style={{ height: `${d.val}%`, backgroundColor: d.color }}
               ></div>
-              <div className="opacity-0 group-hover:opacity-100 absolute -top-8 bg-[#1a1b2e] border border-white/20 px-2 py-1 rounded text-xs font-bold transition-opacity whitespace-nowrap z-10 shadow-lg">
+              <div className="opacity-0 group-hover:opacity-100 absolute -top-8 bg-[#1a1b2e] border border-white/20 px-2 py-1 rounded text-[9px] font-black transition-opacity whitespace-nowrap z-10 shadow-lg tracking-widest">
                 ${(d.val * 120).toLocaleString()}
               </div>
             </div>
@@ -194,75 +194,57 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto custom-scroll p-6 pb-20 space-y-6">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="flex-1 overflow-y-auto custom-scroll max-w-7xl mx-auto p-6 pb-20 space-y-6"
+    >
       
-      {/* Top Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Widget className="flex flex-col justify-between h-44 relative">
-          <div className="flex justify-between items-start">
-            <h3 className="text-xs opacity-60 uppercase tracking-widest">Today's Sale</h3>
-            <div className="relative">
-              <button onClick={() => toggleMenu('metric1')} className="text-white/40 hover:text-white transition-colors"><MoreVertical size={16} /></button>
-              <ActionMenu isOpen={openMenuId === 'metric1'} onClose={() => setOpenMenuId(null)} />
+      {/* ── Top Metrics ── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {[
+          { label: "Today's Sale", value: "$12,426", icon: DollarSign, trend: "+36%", isUp: true, color: 'text-green-400', bg: 'bg-green-500/10' },
+          { label: "Total Sales", value: "$2,38,485", icon: Target, trend: "-14%", isUp: false, color: 'text-red-400', bg: 'bg-red-500/10' },
+          { label: "Total Orders", value: "84,382", icon: ShoppingCart, trend: "+36%", isUp: true, color: 'text-green-400', bg: 'bg-green-500/10' },
+        ].map((metric, i) => (
+          <div key={i} className="glass-pod p-6 flex flex-col justify-between relative h-40">
+            <div className="flex justify-between items-start mb-3">
+              <div className={`w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center`}>
+                <metric.icon size={18} className="text-blue-400" />
+              </div>
+              <div className="relative">
+                <button onClick={() => toggleMenu(`metric${i}`)} className="text-white/40 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-xl hover:bg-white/10">
+                  <MoreVertical size={16} />
+                </button>
+                <ActionMenu isOpen={openMenuId === `metric${i}`} onClose={() => setOpenMenuId(null)} />
+              </div>
+            </div>
+            <div>
+               <p className="text-[10px] font-black uppercase tracking-widest opacity-50 mb-1">{metric.label}</p>
+               <div className="flex items-end justify-between">
+                 <p className="text-2xl font-black">{metric.value}</p>
+                 <div className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest opacity-60 pb-1">
+                   {metric.isUp ? <ArrowUp size={12} className={metric.color} /> : <ArrowDown size={12} className={metric.color} />}
+                   <span className={metric.color}>{metric.trend}</span>
+                 </div>
+               </div>
             </div>
           </div>
-          <div>
-             <div className="text-4xl font-black mt-2">$12,426</div>
-             <div className="flex items-center gap-1 mt-3 text-xs opacity-60">
-                <ArrowUp size={14} className="text-green-400" />
-                <span className="text-green-400 font-bold">+36%</span>
-                vs last month
-             </div>
-          </div>
-        </Widget>
-
-        <Widget className="flex flex-col justify-between h-44 relative">
-           <div className="flex justify-between items-start">
-            <h3 className="text-xs opacity-60 uppercase tracking-widest">Total Sales</h3>
-            <div className="relative">
-              <button onClick={() => toggleMenu('metric2')} className="text-white/40 hover:text-white transition-colors"><MoreVertical size={16} /></button>
-              <ActionMenu isOpen={openMenuId === 'metric2'} onClose={() => setOpenMenuId(null)} />
-            </div>
-          </div>
-          <div>
-             <div className="text-4xl font-black mt-2">$2,38,485</div>
-             <div className="flex items-center gap-1 mt-3 text-xs opacity-60">
-                <ArrowDown size={14} className="text-red-400" />
-                <span className="text-red-400 font-bold">-14%</span>
-                vs last month
-             </div>
-          </div>
-        </Widget>
-
-        <Widget className="flex flex-col justify-between h-44 relative">
-           <div className="flex justify-between items-start">
-            <h3 className="text-xs opacity-60 uppercase tracking-widest">Total Orders</h3>
-            <div className="relative">
-              <button onClick={() => toggleMenu('metric3')} className="text-white/40 hover:text-white transition-colors"><MoreVertical size={16} /></button>
-              <ActionMenu isOpen={openMenuId === 'metric3'} onClose={() => setOpenMenuId(null)} />
-            </div>
-          </div>
-          <div>
-             <div className="text-4xl font-black mt-2">84,382</div>
-             <div className="flex items-center gap-1 mt-3 text-xs opacity-60">
-                <ArrowUp size={14} className="text-green-400" />
-                <span className="text-green-400 font-bold">+36%</span>
-                vs last month
-             </div>
-          </div>
-        </Widget>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* --- FIXED SALES REPORT CONTAINER USING STRICT GRID --- */}
-        <Widget className="col-span-2 relative h-[26rem] grid grid-rows-[auto_minmax(0,1fr)_auto] gap-2">
+        {/* ── FIXED SALES REPORT CONTAINER USING STRICT GRID ── */}
+        <div className="glass-pod col-span-2 relative h-[26rem] grid grid-rows-[auto_minmax(0,1fr)_auto] gap-2 p-6 md:p-8">
           
-          {/* Header Row (Row 1) */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-4">
-            <div className="flex items-center gap-4">
-              <h3 className="text-lg font-black uppercase">Sales Report</h3>
-              <div className="hidden sm:flex bg-white/5 border border-white/10 rounded-lg p-1 gap-1">
+          {/* Header Row */}
+          <div className="flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center mb-4">
+            <div className="flex items-center gap-3">
+              <Activity size={18} className="text-blue-400" />
+              <h3 className="text-[10px] font-black uppercase tracking-widest opacity-50">Sales Report</h3>
+              <div className="hidden sm:flex bg-white/5 border border-white/10 rounded-xl p-1 gap-1 ml-2">
                 {[
                   { id: 'Area', icon: Activity },
                   { id: 'Bar', icon: BarChart2 },
@@ -272,25 +254,25 @@ export default function Dashboard() {
                     key={type.id}
                     onClick={() => setChartType(type.id)}
                     title={`${type.id} Chart`}
-                    className={`p-1.5 rounded-md transition-all ${
+                    className={`p-1.5 rounded-lg transition-all ${
                       chartType === type.id ? 'bg-white/20 text-blue-300 shadow-sm' : 'text-white/40 hover:text-white hover:bg-white/10'
                     }`}
                   >
-                    <type.icon size={16} />
+                    <type.icon size={14} />
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+            <div className="flex flex-wrap items-center gap-2">
               {timeFilters.map((filter) => (
                 <button 
                   key={filter}
                   onClick={() => setActiveTimeFilter(filter)}
-                  className={`px-3 py-2 rounded-full border transition-all duration-300 ${
+                  className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all duration-300 ${
                     activeTimeFilter === filter 
-                    ? 'text-blue-300 bg-blue-500/20 border-blue-500/30' 
-                    : 'text-white/60 border-transparent hover:text-white hover:bg-white/5'
+                    ? 'bg-blue-500/15 text-blue-400 border border-blue-500/20' 
+                    : 'text-white/40 border border-transparent hover:text-white hover:bg-white/10'
                   }`}
                 >
                   {filter}
@@ -299,70 +281,77 @@ export default function Dashboard() {
               <button 
                 onClick={handleExport}
                 disabled={isExporting}
-                className={`flex items-center gap-2 border px-4 py-2 rounded-full ml-2 transition-all duration-300 ${
+                className={`ml-2 flex items-center justify-center gap-2 py-1.5 px-4 rounded-full text-[9px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-500/20 ${
                   isExporting 
-                  ? 'bg-green-500/20 border-green-500/30 text-green-300' 
-                  : 'border-white/20 bg-white/5 hover:bg-white/10 text-white'
+                  ? 'bg-green-500/20 border border-green-500/30 text-green-400' 
+                  : 'bg-blue-600 hover:bg-blue-500 text-white border border-transparent'
                 }`}
               >
-                {isExporting ? <RefreshCw size={14} className="animate-spin" /> : <Download size={14} />}
-                <span className="hidden md:inline">{isExporting ? 'EXPORTING...' : 'EXPORT PDF'}</span>
+                {isExporting ? <RefreshCw size={12} className="animate-spin" /> : <Download size={12} />}
+                <span className="hidden md:inline">{isExporting ? 'Exporting...' : 'Export PDF'}</span>
               </button>
             </div>
           </div>
 
-          {/* Chart Wrapper (Row 2) - Physically cannot push the rows above/below it */}
+          {/* Chart Wrapper */}
           <div className="relative w-full h-full">
             <div className="absolute inset-0">
                {renderNativeChart()}
             </div>
           </div>
           
-          {/* Labels Row (Row 3) */}
-          <div className="flex justify-between text-[11px] font-bold opacity-40 mt-2 px-2 uppercase tracking-widest">
+          {/* Labels Row */}
+          <div className="flex justify-between text-[9px] font-black opacity-40 mt-4 px-2 uppercase tracking-widest">
             {currentChartData.map(m => <span key={m.label}>{m.label}</span>)}
           </div>
-        </Widget>
-        {/* --- END FIXED COMPONENT --- */}
+        </div>
 
 
-        {/* Traffic Sources */}
-        <Widget className="flex flex-col">
+        {/* ── Traffic Sources ── */}
+        <div className="glass-pod p-6 flex flex-col">
           <div className="flex justify-between items-center mb-8">
-            <h3 className="text-lg font-black uppercase">Traffic Sources</h3>
-            <button className="flex items-center gap-1 text-xs font-bold opacity-60 bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg border border-white/10 hover:opacity-100 transition-all">
-               LAST 7 DAYS <ChevronDown size={14} />
+            <div className="flex items-center gap-2">
+              <Users size={18} className="text-blue-400" />
+              <h3 className="text-[10px] font-black uppercase tracking-widest opacity-50">Traffic Sources</h3>
+            </div>
+            <button className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest opacity-60 bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-xl border border-white/10 hover:opacity-100 transition-all">
+               7 DAYS <ChevronDown size={12} />
             </button>
           </div>
           <div className="space-y-6 flex-1 flex flex-col justify-center">
             {[
               { label: 'Direct', val: '1,43,382', pct: '75%', color: 'bg-blue-400' },
-              { label: 'Referral', val: '87,974', pct: '50%', color: 'bg-blue-500' },
-              { label: 'Social Media', val: '45,211', pct: '25%', color: 'bg-purple-500' },
+              { label: 'Referral', val: '87,974', pct: '50%', color: 'bg-indigo-400' },
+              { label: 'Social Media', val: '45,211', pct: '25%', color: 'bg-purple-400' },
               { label: 'Twitter', val: '21,893', pct: '12%', color: 'bg-sky-400' },
-              { label: 'Facebook', val: '21,893', pct: '12%', color: 'bg-indigo-500' }
+              { label: 'Facebook', val: '21,893', pct: '12%', color: 'bg-blue-600' }
             ].map((t,i) => (
               <div key={i} className="flex flex-col gap-2">
-                <div className="flex justify-between text-xs font-bold opacity-80">
+                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest opacity-80">
                   <span>{t.label}</span>
                   <span>{t.val}</span>
                 </div>
-                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
                   <div className={`h-full ${t.color} rounded-full`} style={{ width: t.pct }}></div>
                 </div>
               </div>
             ))}
           </div>
-        </Widget>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-         {/* Total Bets */}
-         <Widget className="flex flex-col relative">
+         {/* ── Total Bets ── */}
+         <div className="glass-pod p-6 flex flex-col relative">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-black uppercase">Total Bets</h3>
+              <div className="flex items-center gap-2">
+                <Target size={18} className="text-blue-400" />
+                <h3 className="text-[10px] font-black uppercase tracking-widest opacity-50">Total Bets</h3>
+              </div>
               <div className="relative">
-                <button onClick={() => toggleMenu('bets')} className="text-white/40 hover:text-white transition-colors"><MoreVertical size={16} /></button>
+                <button onClick={() => toggleMenu('bets')} className="text-white/40 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-xl hover:bg-white/10">
+                  <MoreVertical size={16} />
+                </button>
                 <ActionMenu isOpen={openMenuId === 'bets'} onClose={() => setOpenMenuId(null)} />
               </div>
             </div>
@@ -375,68 +364,68 @@ export default function Dashboard() {
                     <circle cx="25" cy="25" r="15.9155" fill="none" stroke="#f97316" strokeWidth="8" strokeDasharray="10 90" strokeDashoffset="-90" />
                  </svg>
                  
-                 <div className="absolute top-2 right-2 bg-yellow-400/20 text-yellow-400 px-2 py-0.5 rounded-md backdrop-blur-sm font-black text-xs border border-yellow-400/30">20%</div>
-                 <div className="absolute bottom-6 right-6 bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-md backdrop-blur-sm font-black text-xs border border-orange-500/30">10%</div>
+                 <div className="absolute top-2 right-2 bg-yellow-400/10 text-yellow-400 px-2 py-0.5 rounded-lg font-black text-[9px] border border-yellow-400/20">20%</div>
+                 <div className="absolute bottom-6 right-6 bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded-lg font-black text-[9px] border border-orange-500/20">10%</div>
                  <div className="absolute inset-0 flex items-center justify-center flex-col">
                    <div className="text-white font-black text-3xl">70%</div>
-                   <div className="text-[10px] font-bold opacity-60 uppercase">Mobile</div>
+                   <div className="text-[9px] font-black opacity-50 uppercase tracking-widest mt-1">Mobile</div>
                  </div>
                </div>
-               <div className="w-full space-y-4">
+               <div className="w-full space-y-4 px-4">
                  {[
                    { label: 'Mobile', val: '$50,280', color: 'bg-blue-500' },
                    { label: 'Laptop', val: '$30,160', color: 'bg-yellow-400' },
                    { label: 'Watch', val: '$15,520', color: 'bg-orange-500' }
                  ].map(item => (
-                   <div key={item.label} className="flex justify-between text-sm font-bold opacity-80">
-                     <span className="flex items-center gap-3"><div className={`w-3 h-3 rounded-full ${item.color} shadow-sm`} /> {item.label}</span>
+                   <div key={item.label} className="flex justify-between text-[10px] font-black uppercase tracking-widest opacity-80 border-b border-white/5 pb-3 last:border-0 last:pb-0">
+                     <span className="flex items-center gap-3"><div className={`w-2.5 h-2.5 rounded-full ${item.color} shadow-sm`} /> {item.label}</span>
                      <span>{item.val}</span>
                    </div>
                  ))}
                </div>
             </div>
-         </Widget>
+         </div>
 
-         {/* Recent Customers */}
-         <Widget className="col-span-2 flex flex-col overflow-hidden">
+         {/* ── Recent Customers ── */}
+         <div className="glass-pod p-6 md:p-8 col-span-2 flex flex-col overflow-hidden">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-black uppercase">Recent Customers</h3>
-              <button className="flex items-center gap-1 text-sm font-bold text-blue-400 hover:text-blue-300 hover:underline transition-all">
+              <h3 className="text-[10px] font-black uppercase tracking-widest opacity-50">Recent Customers</h3>
+              <button className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-blue-400 hover:text-blue-300 hover:underline transition-all">
                  View All &rarr;
               </button>
             </div>
             <div className="overflow-x-auto w-full flex-1">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full text-left border-collapse min-w-[600px]">
                 <thead>
-                  <tr className="text-xs font-bold opacity-50 uppercase tracking-widest border-b border-white/10">
-                    <th className="pb-4 px-4 font-bold">Product</th>
-                    <th className="pb-4 px-4 font-bold">Orders ID</th>
-                    <th className="pb-4 px-4 font-bold">Customer Name</th>
-                    <th className="pb-4 px-4 font-bold">Date</th>
-                    <th className="pb-4 px-4 font-bold">Price</th>
-                    <th className="pb-4 px-4 font-bold">Status</th>
+                  <tr className="text-[9px] font-black opacity-50 uppercase tracking-widest border-b border-white/10">
+                    <th className="pb-4 px-4">Product</th>
+                    <th className="pb-4 px-4">Orders ID</th>
+                    <th className="pb-4 px-4">Customer Name</th>
+                    <th className="pb-4 px-4">Date</th>
+                    <th className="pb-4 px-4">Price</th>
+                    <th className="pb-4 px-4">Status</th>
                   </tr>
                 </thead>
-                <tbody className="text-sm font-semibold">
+                <tbody className="text-sm font-bold">
                   {[
-                    { id: '#202395', name: 'Ripon Ahmed', date: '1 Jan 24', price: '$20,584', status: 'Complete', statColor: 'text-green-400 bg-green-500/20 border border-green-500/30' },
-                    { id: '#202396', name: 'Leslie Alexander', date: '2 Jan 24', price: '$11,234', status: 'Pending', statColor: 'text-orange-400 bg-orange-500/20 border border-orange-500/30' },
-                    { id: '#202397', name: 'Ralph Edwards', date: '3 Jan 24', price: '$11,159', status: 'Complete', statColor: 'text-green-400 bg-green-500/20 border border-green-500/30' },
-                    { id: '#202398', name: 'Ronaid Richards', date: '4 Jan 24', price: '$10,483', status: 'Complete', statColor: 'text-green-400 bg-green-500/20 border border-green-500/30' },
-                    { id: '#202399', name: 'Devon Lane', date: '6 Jan 24', price: '$9,084', status: 'Pending', statColor: 'text-orange-400 bg-orange-500/20 border border-orange-500/30' }
+                    { id: '#202395', name: 'Ripon Ahmed', date: '1 Jan 24', price: '$20,584', status: 'Complete', statColor: 'text-green-400 bg-green-500/10 border border-green-500/20' },
+                    { id: '#202396', name: 'Leslie Alexander', date: '2 Jan 24', price: '$11,234', status: 'Pending', statColor: 'text-orange-400 bg-orange-500/10 border border-orange-500/20' },
+                    { id: '#202397', name: 'Ralph Edwards', date: '3 Jan 24', price: '$11,159', status: 'Complete', statColor: 'text-green-400 bg-green-500/10 border border-green-500/20' },
+                    { id: '#202398', name: 'Ronaid Richards', date: '4 Jan 24', price: '$10,483', status: 'Complete', statColor: 'text-green-400 bg-green-500/10 border border-green-500/20' },
+                    { id: '#202399', name: 'Devon Lane', date: '6 Jan 24', price: '$9,084', status: 'Pending', statColor: 'text-orange-400 bg-orange-500/10 border border-orange-500/20' }
                   ].map((row, i) => (
                     <tr key={i} className="hover:bg-white/5 transition-colors border-b border-white/5 last:border-0">
                       <td className="py-4 px-4">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 flex items-center justify-center text-xl shadow-[0_4px_10px_rgba(0,0,0,0.1)] backdrop-blur-md">
+                        <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-xl shrink-0">
                            {glassIcons[i % glassIcons.length]}
                         </div>
                       </td>
-                      <td className="py-4 px-4 opacity-60 font-mono">{row.id}</td>
+                      <td className="py-4 px-4 text-[11px] opacity-60 font-mono uppercase">{row.id}</td>
                       <td className="py-4 px-4">{row.name}</td>
-                      <td className="py-4 px-4 flex items-center gap-2 opacity-60 mt-3"><div className="w-2 h-2 rounded-full bg-white/40"></div> {row.date}</td>
+                      <td className="py-4 px-4 flex items-center gap-2 opacity-60 mt-3 text-[11px] uppercase tracking-wider"><div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div> {row.date}</td>
                       <td className="py-4 px-4 font-black">{row.price}</td>
                       <td className="py-4 px-4">
-                        <span className={`px-3 py-1.5 rounded-lg text-[10px] uppercase font-bold tracking-wider ${row.statColor}`}>
+                        <span className={`px-3 py-1 rounded-full text-[9px] uppercase font-black tracking-widest inline-flex ${row.statColor}`}>
                           {row.status}
                         </span>
                       </td>
@@ -446,20 +435,20 @@ export default function Dashboard() {
               </table>
             </div>
             
-            <div className="flex justify-between items-center mt-6 text-xs font-bold opacity-60">
-               <div>Show <span className="bg-white/10 px-2 py-1 rounded-md border border-white/20">5</span> from {totalPages}</div>
+            <div className="flex justify-between items-center mt-6 text-[9px] font-black uppercase tracking-widest opacity-60">
+               <div>Show <span className="bg-white/10 px-2 py-1 rounded-md border border-white/20 ml-1">5</span> of {totalPages}</div>
                <div className="flex items-center gap-1">
-                 <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${currentPage === 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10'}`}>&lt;</button>
+                 <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className={`w-8 h-8 flex items-center justify-center rounded-xl transition-colors ${currentPage === 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10'}`}>&lt;</button>
                  {[1, 2, 3].map(num => (
-                    <button key={num} onClick={() => handlePageChange(num)} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${currentPage === num ? 'bg-blue-500 text-white shadow-lg font-black border border-blue-400/50' : 'hover:bg-white/10'}`}>{num}</button>
+                    <button key={num} onClick={() => handlePageChange(num)} className={`w-8 h-8 flex items-center justify-center rounded-xl transition-colors ${currentPage === num ? 'bg-blue-600 text-white shadow-lg font-black' : 'hover:bg-white/10'}`}>{num}</button>
                  ))}
                  <span className="px-1">...</span>
-                 <button onClick={() => handlePageChange(totalPages)} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${currentPage === totalPages ? 'bg-blue-500 text-white shadow-lg font-black border border-blue-400/50' : 'hover:bg-white/10'}`}>{totalPages}</button>
-                 <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${currentPage === totalPages ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10'}`}>&gt;</button>
+                 <button onClick={() => handlePageChange(totalPages)} className={`w-8 h-8 flex items-center justify-center rounded-xl transition-colors ${currentPage === totalPages ? 'bg-blue-600 text-white shadow-lg font-black' : 'hover:bg-white/10'}`}>{totalPages}</button>
+                 <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className={`w-8 h-8 flex items-center justify-center rounded-xl transition-colors ${currentPage === totalPages ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10'}`}>&gt;</button>
                </div>
             </div>
-         </Widget>
+         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
