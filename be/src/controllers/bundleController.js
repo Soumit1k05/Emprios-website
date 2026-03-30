@@ -150,17 +150,26 @@ export const downloadBundle = async (req, res) => {
     const bundle = await Bundle.findById(req.params.id);
     if (!bundle) return res.status(404).json({ message: 'Bundle not found' });
 
-    // In a real app, you would generate a zip or redirect to a secure bucket
-    // For now, we'll simulate a download by providing a link to a "free bundle" Online
-    // Since I can't actually create a ZIP file here that the browser would download directly via stream easily without fs complexity
-    // I will redirect to a placeholder zip file or send a "base64" or similar if small, but let's just send a success message with a link.
+    let bundleUrl = "";
     
-    // User asked for "just give some free bundle form online for now"
-    const freeBundleUrl = "https://github.com/Soumit1k05/Emprios-website/archive/refs/heads/main.zip"; 
+    switch (bundle.category) {
+      case 'marketing':
+        bundleUrl = 'https://github.com/Aryann-rajnish/Finance-Book-and-content/archive/refs/heads/master.zip';
+        break;
+      case 'social-media':
+        bundleUrl = 'https://github.com/karthiksekaran/digital-marketing/archive/refs/heads/master.zip';
+        break;
+      case 'crypto':
+        bundleUrl = 'https://github.com/LifnaJos/Cryptocurrency-Blockchain-Development/archive/refs/heads/main.zip';
+        break;
+      case 'investing':
+        bundleUrl = 'https://github.com/Amey-Thakur/FINANCE-MANAGEMENT/archive/refs/heads/main.zip';
+        break;
+    }
     
     res.json({ 
       message: 'Download started', 
-      downloadUrl: freeBundleUrl,
+      downloadUrl: bundleUrl,
       bundleTitle: bundle.title
     });
   } catch (error) {
